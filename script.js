@@ -1,5 +1,8 @@
 // script.js - Complete Rewrite
 
+// BACKEND CONFIGURATION - ADD THIS AT THE TOP
+const BACKEND_URL = "https://emarates-website-production.up.railway.app";
+
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Emirates PTFS Website Loaded');
@@ -9,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Main initialization function
 async function initAll() {
     console.log('🔄 Initializing all components...');
+    initMobileOptimizations(); // Add this line
     initNavigation();
     initSmoothScrolling();
     initBookingForm();
@@ -118,7 +122,7 @@ function initBookingForm() {
         const name = document.getElementById('passenger-name')?.value || '';
         
         try {
-            const response = await fetch('/generate_itinerary', {
+            const response = await fetch(`${BACKEND_URL}/generate_itinerary`, { // UPDATED
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -168,7 +172,7 @@ function initDiscordLogin() {
     if (!discordLoginBtn) return;
     
     discordLoginBtn.addEventListener('click', function() {
-        window.location.href = '/auth/discord';
+        window.location.href = `${BACKEND_URL}/auth/discord`; // UPDATED
     });
 }
 
@@ -226,7 +230,7 @@ function updateCommunityStats() {
 // Authentication functions
 async function checkAuth() {
     try {
-        const response = await fetch('/api/user');
+        const response = await fetch(`${BACKEND_URL}/api/user`); // UPDATED
         const userData = await response.json();
         return userData;
     } catch (error) {
@@ -258,7 +262,7 @@ function updateUIForAuth(userData) {
                     <img src="${avatarUrl}" alt="Avatar" class="user-avatar">
                     <span class="user-name">${userData.user.global_name || userData.user.username}</span>
                 </div>
-                <button class="logout-btn" onclick="window.location.href='/auth/logout'">
+                <button class="logout-btn" onclick="window.location.href='${BACKEND_URL}/auth/logout'"> <!-- UPDATED -->
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             `;
@@ -381,7 +385,7 @@ function initializeMyFlightsDirect() {
             const discordLoginPrompt = document.getElementById('discord-login-prompt');
             if (discordLoginPrompt) {
                 discordLoginPrompt.addEventListener('click', function() {
-                    window.location.href = '/auth/discord';
+                    window.location.href = `${BACKEND_URL}/auth/discord`; // UPDATED
                 });
             }
         }
@@ -393,7 +397,7 @@ function initializeMyFlightsDirect() {
 // Load user flights - SIMPLE VERSION WITH CANCEL BUTTON
 async function loadUserFlights() {
     try {
-        const response = await fetch('/api/my-flights');
+        const response = await fetch(`${BACKEND_URL}/api/my-flights`); // UPDATED
         const data = await response.json();
         
         const flightsList = document.getElementById('flights-list');
@@ -442,7 +446,7 @@ async function loadUserFlights() {
                     </div>
                     
                     <div class="flight-booking-actions">
-                        <a href="/serve_image/${flight.pnr}" target="_blank" class="btn outline">
+                        <a href="${BACKEND_URL}/serve_image/${flight.pnr}" target="_blank" class="btn outline"> <!-- UPDATED -->
                             <i class="fas fa-download"></i> Download Itinerary
                         </a>
                         <button class="btn danger cancel-flight-btn" data-pnr="${flight.pnr}" 
@@ -487,7 +491,7 @@ async function cancelFlight(pnr) {
     
     try {
         // Call backend to delete the flight data
-        const response = await fetch('/api/cancel-flight', {
+        const response = await fetch(`${BACKEND_URL}/api/cancel-flight`, { // UPDATED
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -564,22 +568,6 @@ window.addEventListener('load', function() {
     }, 3000);
 });
 
-// Make functions globally available for HTML onclick events
-window.cancelFlight = cancelFlight;
-window.reinitComponents = reinitComponents;
-
-// Force center header
-document.addEventListener('DOMContentLoaded', function() {
-    const userContainer = document.querySelector('.user-info-container');
-    if (userContainer && userContainer.innerHTML.trim() === '') {
-        userContainer.remove(); // Completely remove empty container
-    }
-});
-
-
-
-
-
 // Mobile-specific optimizations
 function initMobileOptimizations() {
   // Prevent double-tap zoom
@@ -606,10 +594,14 @@ function initMobileOptimizations() {
   }
 }
 
-// Add to your initAll function
-function initAll() {
-    console.log('🔄 Initializing all components...');
-    initMobileOptimizations(); // Add this line
-    initNavigation();
-    // ... rest of your code
-}
+// Make functions globally available for HTML onclick events
+window.cancelFlight = cancelFlight;
+window.reinitComponents = reinitComponents;
+
+// Force center header
+document.addEventListener('DOMContentLoaded', function() {
+    const userContainer = document.querySelector('.user-info-container');
+    if (userContainer && userContainer.innerHTML.trim() === '') {
+        userContainer.remove(); // Completely remove empty container
+    }
+});
