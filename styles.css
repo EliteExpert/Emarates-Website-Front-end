@@ -1,0 +1,3133 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+    --primary: #d71921;
+    --secondary: #ffc400;
+    --dark: #1a1a1a;
+    --light: #f8f9fa;
+    --gray: #6c757d;
+    --success: #28a745;
+    --warning: #ffc107;
+    --danger: #dc3545;
+}
+
+body {
+    background-color: var(--light);
+    color: var(--dark);
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+/* Header & Navigation */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: rgba(26, 26, 26, 0.9);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.navbar {
+    padding: 0.8rem 0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-logo img {
+    height: 40px;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    align-items: center;
+}
+
+.nav-item {
+    margin-left: 1.5rem;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+    position: relative;
+    padding: 0.5rem 0;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--secondary);
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--secondary);
+}
+
+.discord-btn {
+    background: #5865F2;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.discord-btn:hover {
+    background: #4752c4;
+}
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.bar {
+    width: 25px;
+    height: 3px;
+    background: white;
+    margin: 3px 0;
+    transition: 0.3s;
+}
+
+/* Home Section */
+.home-section {
+    height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+}
+
+.video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#bg-video {
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.home-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    padding: 0 2rem;
+}
+
+.home-title {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.home-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--secondary);
+}
+
+.home-description {
+    font-size: 1.2rem;
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.home-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.8rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+}
+
+.btn.primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn.primary:hover {
+    background: #b5151c;
+    transform: translateY(-2px);
+}
+
+.btn.secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+.btn.secondary:hover {
+    background: white;
+    color: var(--dark);
+    transform: translateY(-2px);
+}
+
+.btn.outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.btn.outline:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn.discord-btn {
+    background: #5865F2;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn.discord-btn:hover {
+    background: #4752c4;
+}
+
+.btn.large {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+}
+
+.btn.full-width {
+    width: 100%;
+}
+
+.btn.small {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+}
+
+/* Sections */
+section {
+    padding: 5rem 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--dark);
+}
+
+.section-subtitle {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--gray);
+    font-size: 1.1rem;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 8rem 0 4rem;
+    text-align: center;
+    margin-top: 70px;
+}
+
+.page-header h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.page-header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* Features Section */
+.features-section {
+    padding: 5rem 0;
+    background: white;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.feature-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 8px;
+    transition: transform 0.3s;
+    background: var(--light);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+}
+
+.feature-card h3 {
+    margin-bottom: 1rem;
+    color: var(--dark);
+}
+
+/* Stats Section */
+.stats-section {
+    background: var(--dark);
+    color: white;
+    padding: 4rem 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Classes Section */
+.classes-section {
+    background: white;
+}
+
+.classes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.class-card {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    border-top: 4px solid var(--primary);
+}
+
+.class-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.class-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.class-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.class-card p {
+    margin-bottom: 1.5rem;
+    color: var(--gray);
+}
+
+.class-features {
+    list-style: none;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.class-features li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.class-features li:before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--success);
+    font-weight: bold;
+}
+
+.class-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+}
+
+/* Comparison Section */
+.comparison-section {
+    background: #f8f9fa;
+    padding: 5rem 0;
+}
+
+.comparison-table {
+    overflow-x: auto;
+    margin-top: 2rem;
+}
+
+.comparison-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.comparison-table th {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+}
+
+.comparison-table tr:hover {
+    background: #f8f9fa;
+}
+
+.comparison-table .fas.fa-check {
+    color: var(--success);
+}
+
+.comparison-table .fas.fa-times {
+    color: var(--danger);
+}
+
+/* Booking Section */
+.booking-section {
+    background: #f8f9fa;
+}
+
+.booking-form-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.booking-form {
+    padding: 2rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input, .form-group select {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.booking-features {
+    background: var(--dark);
+    color: white;
+    padding: 2rem;
+}
+
+.booking-features h3 {
+    margin-bottom: 1.5rem;
+    color: var(--secondary);
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.feature i {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: var(--secondary);
+}
+
+.feature h4 {
+    margin-bottom: 0.3rem;
+}
+
+/* Routes Section */
+.routes-section {
+    padding: 5rem 0;
+    background: white;
+}
+
+.routes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.route-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    transition: transform 0.3s;
+}
+
+.route-card:hover {
+    transform: translateY(-5px);
+}
+
+.route-cities {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.route-name {
+    color: var(--gray);
+    margin-bottom: 1rem;
+}
+
+.route-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+/* Status Section */
+.status-section {
+    background: white;
+}
+
+.status-search {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.search-form {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.search-form input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.status-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.status-header {
+    background: var(--dark);
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-header h3 {
+    color: var(--secondary);
+}
+
+.last-updated {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.flights-list {
+    padding: 0;
+}
+
+.flight-item {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eee;
+    transition: background 0.3s;
+    background: white;
+}
+
+.flight-item:hover {
+    background: #f1f1f1;
+}
+
+.flight-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.flight-route {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.city {
+    font-size: 1.5rem;
+}
+
+.flight-details {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.flight-number {
+    font-weight: 600;
+}
+
+.flight-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.flight-status.in-air {
+    background: #e7f7ef;
+    color: var(--success);
+}
+
+.flight-status.boarding {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.flight-status.scheduled {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.flight-status.landed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.flight-progress {
+    margin-top: 1rem;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 4px;
+    transition: width 0.5s;
+}
+
+.progress-text {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.flight-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-label {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-bottom: 0.3rem;
+}
+
+.meta-value {
+    font-weight: 600;
+}
+
+.discord-integration {
+    padding: 1.5rem 2rem;
+    background: #f1f1f1;
+    text-align: center;
+}
+
+.discord-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #5865F2;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+/* Stats Overview */
+.stats-overview {
+    padding: 5rem 0;
+    background: #f8f9fa;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-card .stat-number {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .stat-label {
+    color: var(--gray);
+}
+
+/* Careers Section */
+.careers-section {
+    background: #f8f9fa;
+}
+
+.careers-intro {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 4rem;
+}
+
+.careers-intro h2 {
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+}
+
+.careers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.career-card {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
+}
+
+.career-card:hover {
+    transform: translateY(-5px);
+}
+
+.career-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.career-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.career-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--gray);
+}
+
+.career-card p {
+    margin-bottom: 1.5rem;
+}
+
+.career-requirements {
+    margin-bottom: 1.5rem;
+}
+
+.career-requirements h4 {
+    margin-bottom: 0.5rem;
+}
+
+.career-requirements ul {
+    padding-left: 1.5rem;
+}
+
+.career-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.info-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.info-link:hover {
+    text-decoration: underline;
+}
+
+.careers-benefits {
+    margin-top: 5rem;
+}
+
+.careers-benefits h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.benefit {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.benefit i {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.benefit h4 {
+    margin-bottom: 0.5rem;
+}
+
+/* Application Process */
+.application-process {
+    margin-top: 5rem;
+    text-align: center;
+}
+
+.process-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.step {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 auto 1.5rem;
+}
+
+.step h4 {
+    margin-bottom: 1rem;
+    color: var(--dark);
+}
+
+/* Join Section */
+.join-section {
+    background: white;
+}
+
+.join-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+}
+
+.community-stats h2 {
+    margin-bottom: 2rem;
+    color: var(--primary);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Discord Widget */
+.discord-widget {
+    margin-top: 3rem;
+}
+
+.discord-widget h3 {
+    margin-bottom: 1rem;
+}
+
+.widget-placeholder {
+    background: #36393f;
+    border-radius: 8px;
+    overflow: hidden;
+    color: white;
+}
+
+.widget-header {
+    background: #2f3136;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.widget-content {
+    display: flex;
+    height: 300px;
+}
+
+.online-indicators {
+    width: 200px;
+    background: #2f3136;
+    padding: 1rem;
+    border-right: 1px solid #40444b;
+}
+
+.online-title {
+    color: #b9bbbe;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.member-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.member {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status.online {
+    background: #3ba55c;
+}
+
+.status.idle {
+    background: #faa81a;
+}
+
+.channel-list {
+    flex: 1;
+    padding: 1rem;
+}
+
+.channel-category {
+    color: #8e9297;
+    font-size: 0.8rem;
+    margin: 1rem 0 0.5rem;
+    text-transform: uppercase;
+}
+
+.channel {
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #8e9297;
+}
+
+.channel:hover {
+    background: #3a3c42;
+    color: white;
+}
+
+.channel.active {
+    background: #3a3c42;
+    color: white;
+}
+
+.join-card {
+    background: var(--dark);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.join-card h3 {
+    margin-bottom: 1rem;
+    color: var(--secondary);
+}
+
+.join-card p {
+    margin-bottom: 1.5rem;
+}
+
+.join-features {
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.join-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.join-feature i {
+    color: var(--success);
+}
+
+.join-requirements {
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.join-requirements h4 {
+    margin-bottom: 1rem;
+    color: var(--secondary);
+}
+
+.join-requirements ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.join-requirements li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.join-requirements li:before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--success);
+    font-weight: bold;
+}
+
+.join-note {
+    font-size: 0.8rem;
+    margin-top: 1rem;
+    color: #ccc;
+}
+
+/* Events Section */
+.events-section {
+    padding: 5rem 0;
+    background: #f8f9fa;
+}
+
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.event-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+}
+
+.event-date {
+    background: var(--primary);
+    color: white;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    min-width: 70px;
+}
+
+.event-date .day {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.event-date .month {
+    display: block;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.event-details {
+    flex: 1;
+}
+
+.event-details h3 {
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.event-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.event-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Testimonials */
+.testimonials-section {
+    padding: 5rem 0;
+    background: white;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.testimonial {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 2rem;
+    border-left: 4px solid var(--primary);
+}
+
+.testimonial-content {
+    margin-bottom: 1.5rem;
+    font-style: italic;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.author-avatar {
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    border-radius: 50%;
+}
+
+.author-name {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.author-role {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+/* Footer */
+.footer {
+    background: var(--dark);
+    color: white;
+    padding: 3rem 0 1rem;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.footer-section h3, .footer-section h4 {
+    margin-bottom: 1rem;
+    color: var(--secondary);
+}
+
+.footer-section p {
+    margin-bottom: 1rem;
+    color: #ccc;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-section ul li a {
+    color: #ccc;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-section ul li a:hover {
+    color: var(--secondary);
+}
+
+.footer-section ul li i {
+    margin-right: 0.5rem;
+    width: 20px;
+    color: var(--secondary);
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #333;
+    border-radius: 50%;
+    color: white;
+    transition: background 0.3s;
+}
+
+.social-links a:hover {
+    background: var(--primary);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid #333;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: modalFade 0.3s;
+}
+
+@keyframes modalFade {
+    from {opacity: 0; transform: translateY(-50px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--dark);
+}
+
+.close-modal {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--gray);
+}
+
+.close-modal:hover {
+    color: var(--dark);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.login-note {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-top: 1rem;
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .home-title {
+        font-size: 3rem;
+    }
+    
+    .booking-form-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .join-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .widget-content {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .online-indicators {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #40444b;
+    }
+}
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+    
+    .nav-menu {
+        position: fixed;
+        left: -100%;
+        top: 70px;
+        flex-direction: column;
+        background: var(--dark);
+        width: 100%;
+        text-align: center;
+        transition: 0.3s;
+        box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+        padding: 2rem 0;
+    }
+    
+    .nav-menu.active {
+        left: 0;
+    }
+    
+    .nav-item {
+        margin: 1.5rem 0;
+    }
+    
+    .home-title {
+        font-size: 2.5rem;
+    }
+    
+    .home-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .flight-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-form {
+        flex-direction: column;
+    }
+    
+    .event-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .event-meta {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .home-title {
+        font-size: 2rem;
+    }
+    
+    .home-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+    
+    .classes-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .careers-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .process-steps {
+        grid-template-columns: 1fr;
+    }
+    
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* My Flights Styles */
+.my-flights-section {
+    background: #f8f9fa;
+    min-height: 60vh;
+}
+
+.login-prompt {
+    background: white;
+    border-radius: 12px;
+    padding: 4rem 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+.login-prompt-content h3 {
+    margin-bottom: 1rem;
+    color: var(--dark);
+}
+
+.flights-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.flights-header h2 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.flight-booking-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    border-left: 4px solid var(--primary);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.flight-booking-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.flight-booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.flight-route-large {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.flight-route-large .city {
+    font-size: 2rem;
+}
+
+.booking-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.booking-status.confirmed {
+    background: #e7f7ef;
+    color: var(--success);
+}
+
+.flight-booking-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.detail-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-group label {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.detail-group span {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.pnr-code {
+    font-family: monospace;
+    background: #f8f9fa;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.flight-booking-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.no-flights {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.no-flights-content h3 {
+    margin-bottom: 1rem;
+    color: var(--dark);
+}
+
+.no-flights-content p {
+    color: var(--gray);
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.error-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--danger);
+}
+
+.error-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+/* User Welcome in Home Page */
+.user-welcome {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    color: var(--dark);
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Responsive My Flights */
+@media (max-width: 768px) {
+    .flight-booking-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .flight-booking-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .flight-booking-actions {
+        flex-direction: column;
+    }
+    
+    .flight-route-large {
+        font-size: 1.2rem;
+    }
+    
+    .flight-route-large .city {
+        font-size: 1.5rem;
+    }
+}
+
+/* Current Flights Styles */
+.route-meta {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.flight-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+    width: fit-content;
+}
+
+.flight-status.active {
+    background: #e7f7ef;
+    color: var(--success);
+}
+
+.flight-status.boarding {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.flight-status.scheduled {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.pilots-online {
+    font-size: 0.9rem;
+    color: var(--gray);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.pilots-online::before {
+    content: "👥";
+    font-size: 0.8rem;
+}
+
+/* Font weight utilities for Emirates font */
+.home-title {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    font-weight: bold; /* Use Emirates Bold */
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--dark);
+    font-weight: bold; /* Use Emirates Bold */
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: normal; /* Use Emirates Regular */
+    transition: color 0.3s;
+    position: relative;
+    padding: 0.5rem 0;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.8rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: normal; /* Use Emirates Regular */
+    transition: all 0.3s;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+}
+
+/* Ensure all text uses the Emirates font */
+body, h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select {
+    font-family: 'Emirates', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Specific font weights */
+h1, h2, h3, h4, h5, h6, .home-title, .section-title, .nav-logo {
+    font-weight: bold;
+}
+
+p, span, .nav-link, .btn, .form-group label {
+    font-weight: normal;
+}
+
+/* Navigation Layout - Move items to right */
+.nav-menu {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    margin-left: auto; /* Push everything to right */
+}
+
+.nav-item {
+    margin-left: 1.5rem;
+}
+
+/* User Info Styles - Outside the blue box */
+.user-info-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    font-weight: 500;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--secondary);
+}
+
+.user-name {
+    font-weight: 600;
+}
+
+.logout-btn {
+    background: #dc3545 !important;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logout-btn:hover {
+    background: #c82333 !important;
+    transform: translateY(-1px);
+}
+
+/* Hide original login button when user is logged in */
+.discord-btn.user-logged-in {
+    display: none !important;
+}
+
+/* Cancel button styles */
+.btn.danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+}
+
+.btn.danger:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+.booking-status.cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.booking-status.confirmed {
+    background: #e7f7ef;
+    color: var(--success);
+}
+
+/* Ensure navigation items are properly aligned */
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.nav-logo {
+    margin-right: auto; /* Push logo to left */
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .user-info-container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Add to styles.css */
+.cancel-flight-btn {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.flight-booking-actions {
+    display: flex !important;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn.danger {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Ensure cancel buttons are visible */
+.flight-booking-actions {
+    display: flex !important;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn.danger {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    background: #dc3545 !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.8rem 1.5rem !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s !important;
+}
+
+.btn.danger:hover {
+    background: #c82333 !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Make sure the actions container is properly styled */
+.flight-booking-card .flight-booking-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+/* Fix flight booking actions layout */
+.flight-booking-actions {
+    display: flex !important;
+    gap: 15px !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    margin-top: 20px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid #eee !important;
+}
+
+/* Style the cancel button properly */
+.btn.danger {
+    background: #dc3545 !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 14px !important;
+}
+
+.btn.danger:hover {
+    background: #c82333 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3) !important;
+}
+
+/* Style the outline button (download) */
+.btn.outline {
+    background: transparent !important;
+    color: #d71921 !important;
+    border: 2px solid #d71921 !important;
+    padding: 12px 24px !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 14px !important;
+}
+
+.btn.outline:hover {
+    background: #d71921 !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(215, 25, 33, 0.3) !important;
+}
+
+.flight-booking-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.cancel-flight-btn {
+    background: #dc3545;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.cancel-flight-btn:hover {
+    background: #c82332;
+}
+
+/* Booking Section Layout */
+.booking-section {
+    padding: 3rem 0;
+}
+
+.booking-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.booking-content {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr; /* Form wider (2/3), Info thinner (1/3) */
+    gap: 3rem;
+    align-items: start;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Form Styles - WIDER */
+.booking-form-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 2.5rem;
+    height: fit-content;
+}
+
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-section {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.form-section h4 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--dark);
+    font-size: 0.9rem;
+}
+
+.form-group input, .form-group select {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    width: 100%;
+}
+
+.form-group input:focus, .form-group select:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(215, 25, 33, 0.1);
+}
+
+.form-group input::placeholder {
+    color: #999;
+}
+
+/* Form Row Layout */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* "Why Fly With Us" Styles - THINNER */
+.booking-info {
+    background: var(--dark);
+    color: white;
+    padding: 2rem; /* Slightly less padding for thinner look */
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    height: fit-content;
+}
+
+.booking-info h3 {
+    margin-bottom: 1rem;
+    color: var(--secondary);
+    text-align: left;
+    font-size: 1.4rem; /* Slightly smaller */
+}
+
+.booking-description {
+    margin-bottom: 1.5rem;
+    color: #ccc;
+    line-height: 1.5;
+    text-align: left;
+    font-size: 0.95rem; /* Slightly smaller */
+}
+
+/* Booking Features - Compact for thinner section */
+.booking-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem; /* Tighter spacing */
+    text-align: left;
+}
+
+.booking-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem; /* Tighter spacing */
+    padding: 0.4rem 0; /* Less padding */
+    text-align: left;
+}
+
+.booking-feature i {
+    color: #28a745;
+    font-size: 1rem; /* Slightly smaller icons */
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
+.booking-feature span {
+    color: white;
+    line-height: 1.3;
+    text-align: left;
+    font-size: 0.9rem; /* Slightly smaller text */
+}
+
+/* Submit Button */
+.btn.primary.large.full-width {
+    margin-top: 0.5rem;
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: var(--primary);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn.primary.large.full-width:hover {
+    background: #b5151c;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .booking-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        max-width: 600px;
+    }
+    
+    .booking-info {
+        order: 2;
+    }
+    
+    .booking-form-container {
+        order: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .booking-form-container {
+        padding: 1.5rem;
+    }
+    
+    .booking-info {
+        padding: 1.5rem;
+    }
+    
+    .booking-container {
+        padding: 0 1rem;
+    }
+    
+    .booking-content {
+        max-width: 100%;
+    }
+}
+
+/* Make all form inputs wider */
+.form-group input, 
+.form-group select {
+    width: 100%;
+    min-width: 200px;
+    padding: 1rem; /* Also make taller for better appearance */
+}
+
+/* Make form container accommodate wider inputs */
+.booking-form-container {
+    min-width: 600px;
+}
+
+@media (max-width: 768px) {
+    .form-group input, 
+    .form-group select {
+        min-width: unset; /* Remove min-width on mobile */
+        width: 100%;
+    }
+    
+    .booking-form-container {
+        min-width: unset;
+    }
+}
+
+/* Fix navigation spacing */
+.nav-menu {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    margin-left: auto;
+    gap: 1rem; /* Add consistent spacing between items */
+    flex-wrap: wrap; /* Allow items to wrap if needed */
+}
+
+.nav-item {
+    margin-left: 1.5rem;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Ensure user info doesn't break */
+.user-info-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Make sure logo doesn't take too much space */
+.nav-logo img {
+    height: 40px;
+    flex-shrink: 0; /* Prevent logo from shrinking */
+}
+
+/* Careers Grid - 4 cards in one row with equal height */
+.careers-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
+    gap: 2rem;
+    margin-bottom: 4rem;
+    align-items: stretch; /* Make all cards same height */
+}
+
+/* Make career cards wider and equal height */
+.career-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Take full height of grid cell */
+    min-height: 400px; /* Minimum height for consistency */
+}
+
+.career-card:hover {
+    transform: translateY(-5px);
+}
+
+.career-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.career-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+
+.career-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--gray);
+}
+
+.career-card p {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    flex-grow: 0; /* Don't grow this element */
+}
+
+.career-requirements {
+    margin-bottom: 1.5rem;
+    flex-grow: 1; /* Grow to fill available space */
+}
+
+.career-requirements h4 {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.career-requirements ul {
+    padding-left: 1.2rem;
+    font-size: 0.85rem;
+}
+
+.career-requirements li {
+    margin-bottom: 0.3rem;
+    line-height: 1.3;
+}
+
+.career-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto; /* Push to bottom of card */
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Make the container wider to accommodate wider cards */
+.careers-section .container {
+    max-width: 1400px; /* Wider container */
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 1400px) {
+    .careers-section .container {
+        max-width: 1200px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .careers-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    }
+    
+    .careers-section .container {
+        max-width: 1000px;
+    }
+}
+
+@media (max-width: 992px) {
+    .careers-section .container {
+        max-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .careers-grid {
+        grid-template-columns: 1fr; /* 1 column on mobile */
+    }
+    
+    .career-card {
+        padding: 1.2rem;
+        min-height: 350px; /* Slightly smaller on mobile */
+    }
+    
+    .careers-section .container {
+        max-width: 100%;
+        padding: 0 1rem;
+    }
+}
+
+/* Classes Section - 4 cards in one row with equal height */
+.classes-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
+    gap: 2rem;
+    align-items: stretch; /* Make all cards same height */
+}
+
+/* Make class cards equal height and wider */
+.class-card {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    border-top: 4px solid var(--primary);
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Take full height of grid cell */
+    min-height: 500px; /* Consistent minimum height */
+}
+
+.class-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.class-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.class-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.class-card p {
+    margin-bottom: 1.5rem;
+    color: var(--gray);
+    flex-grow: 0; /* Don't grow this element */
+}
+
+.class-features {
+    list-style: none;
+    margin-bottom: 1.5rem;
+    text-align: left;
+    flex-grow: 1; /* Grow to fill available space */
+}
+
+.class-features li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.class-features li:before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--success);
+    font-weight: bold;
+}
+
+.class-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    flex-grow: 0;
+}
+
+.class-card .btn {
+    margin-top: auto; /* Push button to bottom */
+    width: 100%;
+}
+
+/* Make the container wider */
+.classes-section .container {
+    max-width: 1400px; /* Wider container */
+}
+
+/* Comparison table adjustments for wider layout */
+.comparison-section .container {
+    max-width: 1400px;
+}
+
+.comparison-table {
+    overflow-x: auto;
+    margin-top: 2rem;
+}
+
+.comparison-table table {
+    width: 100%;
+    min-width: 800px; /* Ensure table doesn't get too narrow */
+}
+
+/* Responsive design */
+@media (max-width: 1400px) {
+    .classes-section .container,
+    .comparison-section .container {
+        max-width: 1200px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .classes-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    }
+    
+    .classes-section .container,
+    .comparison-section .container {
+        max-width: 1000px;
+    }
+}
+
+@media (max-width: 992px) {
+    .classes-section .container,
+    .comparison-section .container {
+        max-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .classes-container {
+        grid-template-columns: 1fr; /* 1 column on mobile */
+    }
+    
+    .class-card {
+        padding: 1.5rem;
+        min-height: 450px; /* Slightly smaller on mobile */
+    }
+    
+    .classes-section .container,
+    .comparison-section .container {
+        max-width: 100%;
+        padding: 0 1rem;
+    }
+}
+
+/* Economy Class - Blue */
+.class-card:nth-child(1) {
+    border-top: 4px solid #28a745;
+}
+
+/* Business Class - Green */
+.class-card:nth-child(2) {
+    border-top: 4px solid #0153acfb;
+}
+
+/* First Class - Gold */
+.class-card:nth-child(3) {
+    border-top: 4px solid #ff4107;
+}
+
+/* Private Charter - Purple */
+.class-card:nth-child(4) {
+    border-top: 4px solid #6f42c1;
+}
+
+.class-card:nth-child(1) .class-icon {
+    color: #28a745;
+}
+
+.class-card:nth-child(2) .class-icon {
+    color: #0153acfb;
+}
+
+.class-card:nth-child(3) .class-icon {
+    color: #ff4107;
+}
+
+.class-card:nth-child(4) .class-icon {
+    color: #6f42c1;
+}
+
+/* Search Flights Button Animation */
+.btn.primary.large.full-width {
+    margin-top: 0.5rem;
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: var(--primary);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition for all properties */
+    position: relative;
+    overflow: hidden;
+}
+
+.btn.primary.large.full-width:hover {
+    background: #b5151c;
+    transform: translateY(-2px); /* Lift effect */
+    box-shadow: 0 4px 12px rgba(215, 25, 33, 0.3); /* Shadow effect */
+}
+
+.btn.primary.large.full-width:active {
+    transform: translateY(0); /* Press down effect */
+    box-shadow: 0 2px 6px rgba(215, 25, 33, 0.3);
+}
+
+/* Log Out Button Animation */
+.logout-btn {
+    background: #dc3545 !important;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.logout-btn:hover {
+    background: #c82333 !important;
+    transform: translateY(-2px); /* Lift effect */
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3); /* Shadow effect */
+}
+
+.logout-btn:active {
+    transform: translateY(0); /* Press down effect */
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+/* Fix white space between header and page header */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: rgba(26, 26, 26, 0.95); /* More opaque */
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.page-header {
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Parallax effect */
+    color: white;
+    padding: 8rem 0 4rem;
+    text-align: center;
+    margin-top: 70px; /* Match header height exactly */
+    position: relative;
+}
+
+/* Ensure no margin/padding issues */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Alternative fix if the above doesn't work */
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: -70px; /* Pull up to cover gap */
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7));
+    z-index: -1;
+}
+
+/* Nuclear option - remove all potential gaps */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Make sure header height is consistent */
+.navbar {
+    height: 70px; /* Fixed height */
+    display: flex;
+    align-items: center;
+}
+
+/* Remove grey background from events preview in join page */
+.events-preview {
+    background: transparent !important;
+    padding: 0 !important;
+    margin-top: 2rem;
+}
+
+.events-preview .section-title {
+    text-align: left;
+    margin-bottom: 1.5rem;
+    color: var(--dark);
+}
+
+/* Ensure event cards maintain their white background */
+.events-preview .event-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
+    margin-bottom: 1rem;
+}
+
+.events-preview .event-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Change font size for Upcoming Community Events */
+.events-preview .section-title {
+    font-size: 1.8rem; /* Change this value */
+    text-align: left;
+    margin-bottom: 1.5rem;
+    color: var(--dark);
+}
+
+/* Hide the empty user container specifically when logged out */
+.user-info-container {
+    position: absolute;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* When user info container is empty (logged out), hide it */
+.user-info-container:empty {
+    visibility: hidden;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+header {
+    animation: headerSlideDown 0.5s ease-out;
+}
+
+@keyframes headerSlideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Stats Section Text Color */
+.stats-section {
+    background: var(--dark);
+    color: white; /* This makes all text white */
+    padding: 4rem 0;
+}
+
+.stats-section .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #c82332; /* Gold/yellow color for numbers */
+    margin-bottom: 0.5rem;
+}
+
+.stats-section .stat-label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    color: #1a1a1a;
+}
+
+
+
+
+
+
+
+
+
+
+/* Add to your existing mobile styles */
+@media (max-width: 768px) {
+  /* Minimum touch target size */
+  .btn, .nav-link, .discord-btn, .logout-btn {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Better touch feedback */
+  .btn:active, .nav-link:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+  }
+  
+  /* Prevent zoom on form inputs */
+  input, select, textarea {
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+}
+
+/* Reduce animations on mobile */
+@media (max-width: 768px) {
+  .feature-card:hover,
+  .class-card:hover,
+  .career-card:hover,
+  .event-card:hover {
+    transform: none; /* Remove hover effects on touch devices */
+  }
+  
+  /* Optimize images and videos */
+  #bg-video {
+    display: none; /* Hide video on mobile to save data */
+  }
+  
+  .home-section {
+    background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                     url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+/* Improved mobile menu */
+@media (max-width: 768px) {
+  .nav-menu {
+    position: fixed;
+    left: -100%;
+    top: 70px;
+    flex-direction: column;
+    background: var(--dark);
+    width: 100%;
+    height: calc(100vh - 70px);
+    text-align: center;
+    transition: 0.3s;
+    box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+    padding: 2rem 0;
+    overflow-y: auto;
+  }
+  
+  .nav-menu.active {
+    left: 0;
+  }
+  
+  .nav-item {
+    margin: 1rem 0;
+    width: 100%;
+  }
+  
+  .nav-link {
+    display: block;
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  /* Improved hamburger animation */
+  .hamburger.active .bar:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .hamburger.active .bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+  }
+  
+  .hamburger.active .bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+}
+
+/* Replace your current font sizes with mobile-first approach */
+:root {
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-base: 1rem;    /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem;  /* 36px */
+}
+
+/* Mobile-first typography */
+.home-title {
+  font-size: var(--font-size-3xl); /* Smaller on mobile */
+  margin-bottom: 1rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.section-title {
+  font-size: var(--font-size-2xl);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Desktop sizes */
+@media (min-width: 768px) {
+  .home-title {
+    font-size: 4rem; /* Larger on desktop */
+  }
+  
+  .section-title {
+    font-size: 2.5rem;
+  }
+}
+
+/* Smooth scrolling for mobile */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text selection on interactive elements */
+.btn, .nav-link, .discord-btn {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Better form experience */
+@media (max-width: 768px) {
+  .booking-form-container {
+    padding: 1.5rem;
+    margin: 0 -1rem;
+    border-radius: 0;
+  }
+  
+  .form-group input, 
+  .form-group select {
+    padding: 1rem;
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+}
+
+/* Lazy loading for images */
+img[data-src] {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img.lazy-loaded {
+  opacity: 1;
+}
+
+/* Critical above-the-fold styles */
+.home-section {
+  will-change: transform;
+}
+
+/* Reduce layout shifts */
+.nav-logo img {
+  width: auto;
+  height: 40px;
+}
+
+.video-background {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  /* Stack all grid layouts */
+  .features-grid,
+  .classes-container,
+  .careers-grid,
+  .routes-grid,
+  .stats-grid,
+  .benefits-grid,
+  .process-steps,
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  /* Better spacing for mobile */
+  section {
+    padding: 3rem 0;
+  }
+  
+  .container {
+    padding: 0 1rem;
+  }
+  
+  /* Improved button layout */
+  .home-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .btn {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+  
+  /* Better flight cards */
+  .flight-booking-card {
+    padding: 1.5rem 1rem;
+    margin: 0 -0.5rem 1.5rem;
+  }
+}
