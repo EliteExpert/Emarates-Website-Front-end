@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Main initialization function
 async function initAll() {
     console.log('🔄 Initializing all components...');
-    initMobileOptimizations(); // Add this line
+    initMobileOptimizations();
     initNavigation();
     initSmoothScrolling();
     initBookingForm();
@@ -122,11 +122,12 @@ function initBookingForm() {
         const name = document.getElementById('passenger-name')?.value || '';
         
         try {
-            const response = await fetch(`${BACKEND_URL}/generate_itinerary`, { // UPDATED
+            const response = await fetch(`${BACKEND_URL}/generate_itinerary`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',  // ADDED
                 body: JSON.stringify({
                     name: name,
                     departure: from,
@@ -172,7 +173,7 @@ function initDiscordLogin() {
     if (!discordLoginBtn) return;
     
     discordLoginBtn.addEventListener('click', function() {
-        window.location.href = `${BACKEND_URL}/auth/discord`; // UPDATED
+        window.location.href = `${BACKEND_URL}/auth/discord`;
     });
 }
 
@@ -230,7 +231,9 @@ function updateCommunityStats() {
 // Authentication functions
 async function checkAuth() {
     try {
-        const response = await fetch(`${BACKEND_URL}/api/user`); // UPDATED
+        const response = await fetch(`${BACKEND_URL}/api/user`, {
+            credentials: 'include'  // ADDED
+        });
         const userData = await response.json();
         return userData;
     } catch (error) {
@@ -262,7 +265,7 @@ function updateUIForAuth(userData) {
                     <img src="${avatarUrl}" alt="Avatar" class="user-avatar">
                     <span class="user-name">${userData.user.global_name || userData.user.username}</span>
                 </div>
-                <button class="logout-btn" onclick="window.location.href='${BACKEND_URL}/auth/logout'"> <!-- UPDATED -->
+                <button class="logout-btn" onclick="window.location.href='${BACKEND_URL}/auth/logout'">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             `;
@@ -385,7 +388,7 @@ function initializeMyFlightsDirect() {
             const discordLoginPrompt = document.getElementById('discord-login-prompt');
             if (discordLoginPrompt) {
                 discordLoginPrompt.addEventListener('click', function() {
-                    window.location.href = `${BACKEND_URL}/auth/discord`; // UPDATED
+                    window.location.href = `${BACKEND_URL}/auth/discord`;
                 });
             }
         }
@@ -397,211 +400,6 @@ function initializeMyFlightsDirect() {
 // Load user flights - SIMPLE VERSION WITH CANCEL BUTTON
 async function loadUserFlights() {
     try {
-        const response = await fetch(`${BACKEND_URL}/api/my-flights`); // UPDATED
-        const data = await response.json();
-        
-        const flightsList = document.getElementById('flights-list');
-        const noFlights = document.getElementById('no-flights');
-        
-        if (data.success && data.flights && data.flights.length > 0) {
-            let flightsHTML = '';
-            
-            data.flights.forEach((flight) => {
-                flightsHTML += `
-                <div class="flight-booking-card" data-pnr="${flight.pnr}">
-                    <div class="flight-booking-header">
-                        <div class="flight-route-large">
-                            <span class="city">${flight.departure}</span>
-                            <i class="fas fa-long-arrow-alt-right"></i>
-                            <span class="city">${flight.destination}</span>
-                        </div>
-                        <div class="booking-status ${flight.status.toLowerCase()}">${flight.status}</div>
-                    </div>
-                    
-                    <div class="flight-booking-details">
-                        <div class="detail-group">
-                            <label>Flight Number</label>
-                            <span>${flight.flight_number}</span>
-                        </div>
-                        <div class="detail-group">
-                            <label>PNR</label>
-                            <span class="pnr-code">${flight.pnr}</span>
-                        </div>
-                        <div class="detail-group">
-                            <label>Class</label>
-                            <span>${flight.class}</span>
-                        </div>
-                        <div class="detail-group">
-                            <label>Departure</label>
-                            <span>${flight.departure_time} • ${flight.departure_name}</span>
-                        </div>
-                        <div class="detail-group">
-                            <label>Arrival</label>
-                            <span>${flight.arrival_time} • ${flight.destination_name}</span>
-                        </div>
-                        <div class="detail-group">
-                            <label>Booking Date</label>
-                            <span>${new Date(flight.booking_date).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flight-booking-actions">
-                        <a href="${BACKEND_URL}/serve_image/${flight.pnr}" target="_blank" class="btn outline"> <!-- UPDATED -->
-                            <i class="fas fa-download"></i> Download Itinerary
-                        </a>
-                        <button class="btn danger cancel-flight-btn" data-pnr="${flight.pnr}" 
-                                style="background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; margin-left: 10px;"
-                                onclick="cancelFlight('${flight.pnr}')">
-                            <i class="fas fa-times"></i> Cancel Flight
-                        </button>
-                    </div>
-                </div>
-                `;
-            });
-            
-            flightsList.innerHTML = flightsHTML;
-            noFlights.style.display = 'none';
-            flightsList.style.display = 'block';
-        } else {
-            flightsList.style.display = 'none';
-            noFlights.style.display = 'block';
-        }
-    } catch (error) {
-        console.error('Error loading flights:', error);
-        document.getElementById('flights-list').innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Error loading flights. Please try again.</p>
-            </div>
-        `;
-    }
-}
-
-// CANCEL FLIGHT FUNCTION WITH CONFIRMATION AND BACKEND DELETION
-async function cancelFlight(pnr) {
-    // Show confirmation dialog
-    const confirmed = confirm('Are you sure you want to cancel this flight? This action cannot be undone.');
-    
-    if (!confirmed) {
-        console.log('Cancellation cancelled by user');
-        return;
-    }
-    
-    console.log('Cancelling flight:', pnr);
-    
-    try {
-        // Call backend to delete the flight data
-        const response = await fetch(`${BACKEND_URL}/api/cancel-flight`, { // UPDATED
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ pnr: pnr })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            // Only remove from frontend if backend deletion was successful
-            const flightCard = document.querySelector(`.flight-booking-card:has(button[onclick="cancelFlight('${pnr}')"])`);
-            if (flightCard) {
-                // Add smooth removal animation
-                flightCard.style.transition = 'all 0.3s ease';
-                flightCard.style.opacity = '0';
-                flightCard.style.transform = 'translateX(-100%)';
-                
-                setTimeout(() => {
-                    flightCard.remove();
-                    console.log('Flight removed from page and backend');
-                    
-                    // Check if no flights left
-                    const remainingFlights = document.querySelectorAll('.flight-booking-card');
-                    if (remainingFlights.length === 0) {
-                        document.getElementById('flights-list').style.display = 'none';
-                        document.getElementById('no-flights').style.display = 'block';
-                    }
-                }, 300);
-            }
-        } else {
-            alert('Failed to cancel flight: ' + result.error);
-        }
-    } catch (error) {
-        console.error('Cancel flight error:', error);
-        alert('Failed to cancel flight. Please try again.');
-    }
-}
-
-// Global function to reinitialize components
-function reinitComponents() {
-    initNavigation();
-    initDiscordLogin();
-    initModal();
-    
-    // Re-check auth and update UI
-    checkAuth().then(userData => {
-        updateUIForAuth(userData);
-    });
-    
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    document.querySelectorAll('.nav-link').forEach(link => {
-        if (link.getAttribute('href') === currentPage) {
-            link.classList.add('active');
-        }
-    });
-}
-
-// Video background fallback
-window.addEventListener('load', function() {
-    const video = document.getElementById('bg-video');
-    if (!video) return;
-    
-    setTimeout(function() {
-        if (video.readyState === 0) {
-            const homeSection = document.querySelector('.home-section');
-            if (homeSection) {
-                homeSection.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80")';
-                homeSection.style.backgroundSize = 'cover';
-                homeSection.style.backgroundPosition = 'center';
-                document.querySelector('.video-background').style.display = 'none';
-            }
-        }
-    }, 3000);
-});
-
-// Mobile-specific optimizations
-function initMobileOptimizations() {
-  // Prevent double-tap zoom
-  let lastTouchEnd = 0;
-  document.addEventListener('touchend', function (event) {
-    const now = (new Date()).getTime();
-    if (now - lastTouchEnd <= 300) {
-      event.preventDefault();
-    }
-    lastTouchEnd = now;
-  }, false);
-  
-  // Better touch handling
-  if ('ontouchstart' in window) {
-    document.documentElement.classList.add('touch-device');
-  }
-  
-  // Load video only on desktop
-  if (window.innerWidth > 768) {
-    const video = document.getElementById('bg-video');
-    if (video) {
-      video.preload = 'auto';
-    }
-  }
-}
-
-// Make functions globally available for HTML onclick events
-window.cancelFlight = cancelFlight;
-window.reinitComponents = reinitComponents;
-
-// Force center header
-document.addEventListener('DOMContentLoaded', function() {
-    const userContainer = document.querySelector('.user-info-container');
-    if (userContainer && userContainer.innerHTML.trim() === '') {
-        userContainer.remove(); // Completely remove empty container
-    }
-});
+        const response = await fetch(`${BACKEND_URL}/api/my-flights`, {
+            credentials: 'include'  // ADDED
+       
