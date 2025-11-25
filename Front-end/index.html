@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <meta name="theme-color" content="#d71921">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Emirates PTFS - Premium Flight Experience</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <div id="header"></div>
+
+    <!-- Home Section with Video Background -->
+    <section class="home-section">
+        <div class="video-background">
+            <video autoplay muted loop id="bg-video">
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-airplane-flying-in-the-sky-42937-large.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="video-overlay"></div>
+        </div>
+        <div class="home-content">
+            <h1 class="home-title">Emirates PTFS</h1>
+            <p class="home-subtitle">Experience Premium Flight Simulation</p>
+            <p class="home-description">Join thousands of aviation enthusiasts in our realistic flight simulation community</p>
+            <div class="home-buttons">
+                <a href="booking.html" class="btn primary">Book a Flight</a>
+                <a href="join.html" class="btn secondary">Join Community</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">Why Choose Emirates PTFS?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-plane"></i>
+                    </div>
+                    <h3>Realistic Simulation</h3>
+                    <p>Experience the most authentic flight simulation with realistic physics and aircraft systems.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Active Community</h3>
+                    <p>Join thousands of pilots and aviation enthusiasts in our thriving Discord community.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Global Network</h3>
+                    <p>Fly to destinations worldwide with our extensive virtual airline network.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>24/7 Support</h3>
+                    <p>Get help from our dedicated team of staff and experienced community members.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="stat-number">10+</div>
+                    <div class="stat-label">Active Pilots</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">40+</div>
+                    <div class="stat-label">Flights Completed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">150+</div>
+                    <div class="stat-label">Destinations</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Operations</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer"></div>
+
+    <script src="script.js"></script>
+<script>
+    // Load header and footer components
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load header if element exists
+        const headerElement = document.getElementById('header');
+        if (headerElement) {
+            fetch('components/header.html')
+                .then(response => response.text())
+                .then(data => {
+                    headerElement.innerHTML = data;
+                    // Re-initialize components after loading
+                    reinitComponents();
+                })
+                .catch(error => {
+                    console.error('Error loading header:', error);
+                });
+        }
+        
+        // Load footer if element exists
+        const footerElement = document.getElementById('footer');
+        if (footerElement) {
+            fetch('components/footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    footerElement.innerHTML = data;
+                    // Re-initialize modal after loading
+                    initModal();
+                })
+                .catch(error => {
+                    console.error('Error loading footer:', error);
+                });
+        }
+    });
+</script>
+</body>
+</html>
