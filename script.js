@@ -3,9 +3,34 @@
 // BACKEND CONFIGURATION - ADD THIS AT THE TOP
 const BACKEND_URL = "https://emarates-website-production.up.railway.app";
 
+// JWT Token Management
+function storeToken(token) {
+    localStorage.setItem('jwt_token', token);
+}
+
+function getToken() {
+    return localStorage.getItem('jwt_token');
+}
+
+function removeToken() {
+    localStorage.removeItem('jwt_token');
+}
+
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Emirates PTFS Website Loaded');
+    
+    // Check for token in URL after Discord redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    if (token) {
+        storeToken(token);
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        console.log('✅ JWT Token stored from URL');
+    }
+    
     initAll();
 });
 
@@ -121,13 +146,19 @@ function initBookingForm() {
         const flightClass = document.getElementById('class')?.value || 'economy';
         const name = document.getElementById('passenger-name')?.value || '';
         
+        const token = getToken();
+        if (!token) {
+            alert('Please log in to book flights');
+            return;
+        }
+        
         try {
             const response = await fetch(`${BACKEND_URL}/generate_itinerary`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                credentials: 'include',  // ADDED
                 body: JSON.stringify({
                     name: name,
                     departure: from,
@@ -230,9 +261,16 @@ function updateCommunityStats() {
 
 // Authentication functions
 async function checkAuth() {
+    const token = getToken();
+    if (!token) {
+        return { logged_in: false };
+    }
+    
     try {
         const response = await fetch(`${BACKEND_URL}/api/user`, {
-            credentials: 'include'  // ADDED
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
         const userData = await response.json();
         return userData;
@@ -265,7 +303,7 @@ function updateUIForAuth(userData) {
                     <img src="${avatarUrl}" alt="Avatar" class="user-avatar">
                     <span class="user-name">${userData.user.global_name || userData.user.username}</span>
                 </div>
-                <button class="logout-btn" onclick="window.location.href='${BACKEND_URL}/auth/logout'">
+                <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             `;
@@ -303,6 +341,12 @@ function updateUIForAuth(userData) {
             myFlightsNavItem.style.display = 'none';
         }
     }
+}
+
+// Logout function
+function logout() {
+    removeToken();
+    window.location.href = '/';
 }
 
 // Initialize page-specific functionality
@@ -399,9 +443,22 @@ function initializeMyFlightsDirect() {
 
 // Load user flights - SIMPLE VERSION WITH CANCEL BUTTON
 async function loadUserFlights() {
+    const token = getToken();
+    if (!token) {
+        document.getElementById('flights-list').innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Please log in to view your flights.</p>
+            </div>
+        `;
+        return;
+    }
+    
     try {
         const response = await fetch(`${BACKEND_URL}/api/my-flights`, {
-            credentials: 'include'  // ADDED
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
         const data = await response.json();
         
@@ -494,14 +551,20 @@ async function cancelFlight(pnr) {
     
     console.log('Cancelling flight:', pnr);
     
+    const token = getToken();
+    if (!token) {
+        alert('Please log in to cancel flights');
+        return;
+    }
+    
     try {
         // Call backend to delete the flight data
         const response = await fetch(`${BACKEND_URL}/api/cancel-flight`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
-            credentials: 'include',  // ADDED
             body: JSON.stringify({ pnr: pnr })
         });
         
@@ -603,6 +666,7 @@ function initMobileOptimizations() {
 // Make functions globally available for HTML onclick events
 window.cancelFlight = cancelFlight;
 window.reinitComponents = reinitComponents;
+window.logout = logout;
 
 // Force center header
 document.addEventListener('DOMContentLoaded', function() {
