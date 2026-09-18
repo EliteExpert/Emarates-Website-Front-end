@@ -52,6 +52,7 @@ async function initAll() {
     initCounters();
     initFooterYear();
     initMarquee();
+    initFlipClock();
     initPageFeatures();
 
     // Check authentication
@@ -90,17 +91,13 @@ function initNavigation() {
         });
     });
     
-    // Change navbar style on scroll
+    // Elevate the masthead once the page scrolls
     window.addEventListener('scroll', function() {
         const header = document.querySelector('header');
         if (header) {
-            if (window.scrollY > 100) {
-                header.style.background = 'rgba(26, 26, 26, 0.95)';
-                header.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
-            } else {
-                header.style.background = 'rgba(26, 26, 26, 0.9)';
-                header.style.boxShadow = 'none';
-            }
+            header.style.boxShadow = window.scrollY > 24
+                ? '0 10px 30px rgb(20 25 30 / .08)'
+                : 'none';
         }
     });
 }
@@ -129,22 +126,13 @@ function initSmoothScrolling() {
 }
 
 // Weekly flights (sourced from the FIDS flight operations service)
-const STATUS_CLASSES = {
-    'Check-in Open': 'scheduled',
-    'Boarding': 'boarding',
-    'Final Call': 'boarding',
-    'Gate Closed': 'scheduled',
-    'Delayed': 'delayed',
-    'Cancelled': 'cancelled',
-    'Departed': 'in-air',
-    'In Flight': 'in-air',
-    'Arrived': 'landed'
-};
-
 const TAIL_LOGOS = {
     EK: { src: 'assets/emirates-tail.png', alt: 'Emirates' },
     FZ: { src: 'assets/flydubai-tail.png', alt: 'flydubai' }
 };
+
+const displayTimeFmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' });
+const displayDateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
 function tailLogo(flightNumber) {
     const match = String(flightNumber || '').trim().toUpperCase().match(/^([A-Z]{2})/);
@@ -163,6 +151,16 @@ function addUtcDays(date, days) {
     return value;
 }
 
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[character]);
+}
+
+function fidsStatusClass(status) {
+    return `status-${String(status || '').toLowerCase().replace(/\s+/g, '-')}`;
+}
+
 async function fetchWeeklyFlights() {
     const response = await fetch(`${FIDS_URL}/api/flights`);
     if (!response.ok) throw new Error(`Flight service returned HTTP ${response.status}.`);
@@ -171,113 +169,82 @@ async function fetchWeeklyFlights() {
 
     const weekStart = gmtWeekStart();
     const weekEnd = addUtcDays(weekStart, 6);
-    const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' });
+    const startKey = weekStart.toISOString().slice(0, 10);
+    const endKey = weekEnd.toISOString().slice(0, 10);
 
     return flights
-        .filter((flight) => {
-            const scheduled = flight.date + 'T' + (flight.departureTime || flight.arrivalTime || '00:00') + ':00Z';
-            return scheduled >= weekStart.toISOString().slice(0, 10) + 'T00:00:00Z'
-                && flight.date <= weekEnd.toISOString().slice(0, 10);
+        .filter((flight) => flight.date >= startKey && flight.date <= endKey)
+        .map((flight) => {
+            const time = flight.departureTime || flight.arrivalTime || '00:00';
+            return { ...flight, scheduledTs: Date.parse(`${flight.date}T${time}:00Z`), scheduledTime: time };
         })
-        .map((flight) => ({ ...flight, scheduledTs: Date.parse(`${flight.date}T${flight.departureTime || flight.arrivalTime || '00:00'}:00Z`) }))
-        .sort((a, b) => a.scheduledTs - b.scheduledTs)
-        .map((flight) => ({ ...flight, dateLabel: fmt.format(new Date(flight.date + 'T00:00:00Z')) }));
+        .sort((a, b) => a.scheduledTs - b.scheduledTs);
 }
 
-function airportCode(destination) {
-    const match = String(destination || '').toUpperCase().match(/\(([A-Z]{3})\)\s*$/);
-    return match ? match[1] : String(destination || '—');
+function fidsCountdown(flight) {
+    const remaining = flight.scheduledTs - Date.now();
+    if (remaining <= 0 || ['Delayed', 'Cancelled', 'Arrived'].includes(flight.status)) return '';
+    const totalMinutes = Math.floor(remaining / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const text = `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m`;
+    return flight.type === 'departure' ? `Departs in ${text}` : `Arrives in ${text}`;
 }
 
-function countdownText(ts) {
-    const remaining = ts - Date.now();
-    if (remaining <= 0) return null;
-    const minutes = Math.ceil(remaining / 60000);
-    if (minutes < 60) return `Departs in ${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `Departs in ${hours}h ${minutes % 60}m`;
-    const days = Math.floor(hours / 24);
-    return `Departs in ${days}d ${hours % 24}h`;
-}
-
-function renderFlightItem(flight) {
+function flightCardHtml(flight, index) {
     const isDeparture = flight.type === 'departure';
-    const time = flight.departureTime || flight.arrivalTime || '--:--';
-    const code = airportCode(flight.destination);
-    const statusClass = STATUS_CLASSES[flight.status] || 'scheduled';
-    const logo = tailLogo(flight.flightNumber);
-    const eventLink = typeof flight.discordEvent === 'string' && flight.discordEvent.startsWith('https://discord.com/')
-        ? `<a href="${flight.discordEvent}" target="_blank" rel="noopener" class="event-chip"><i class="fas fa-calendar-check"></i> Event</a>`
+    const scheduledDate = new Date(flight.scheduledTs);
+    const tail = tailLogo(flight.flightNumber);
+    const tailHtml = tail
+        ? `<img class="tail-logo" src="${tail.src}" alt="" onerror="this.style.display='none'">`
         : '';
+    const countdown = fidsCountdown(flight);
+    const eventUrl = typeof flight.discordEvent === 'string' && flight.discordEvent.startsWith('https://discord.com/')
+        ? ` <a class="event-chip" href="${escapeHtml(flight.discordEvent)}" target="_blank" rel="noopener">Event ↗</a>`
+        : '';
+    return `
+        <article class="flight-card" style="animation-delay:${Math.min(index * 45, 360)}ms">
+            <div class="time">
+                <time datetime="${escapeHtml(new Date(flight.scheduledTs).toISOString())}">${escapeHtml(displayTimeFmt.format(scheduledDate))}</time>
+                ${countdown ? `<span class="countdown">${countdown}</span>` : ''}
+            </div>
+            <div class="flight-id">
+                <div class="flight-number-row">${tailHtml}<span class="flight-number">${escapeHtml(flight.flightNumber)}</span></div>
+                <span class="airline">${escapeHtml(flight.airline || 'Emirates PTFS')}</span>
+            </div>
+            <div class="cell destination-cell"><span class="cell-label">${isDeparture ? 'Destination' : 'Origin'}</span><span class="cell-value">${escapeHtml(flight.destination)}${eventUrl}</span></div>
+            <div class="cell aircraft-cell"><span class="cell-label">Aircraft</span><span class="cell-value">${escapeHtml(flight.aircraft || 'TBD')}</span></div>
+            <div class="cell terminal-cell"><span class="cell-label">Terminal</span><span class="terminal">${escapeHtml(flight.terminal || 'TBD')}</span></div>
+            <span class="status ${fidsStatusClass(flight.status)}">${escapeHtml(flight.status)}</span>
+        </article>`;
+}
 
-    let progressHtml;
-    if (flight.status === 'Arrived') {
-        progressHtml = { width: '100%', class: '', text: 'Arrived at the gate' };
-    } else if (flight.scheduledTs > Date.now()) {
-        progressHtml = { width: '0%', class: '', text: countdownText(flight.scheduledTs) || 'Scheduled' };
-    } else if (['Departed', 'In Flight'].includes(flight.status)) {
-        progressHtml = { width: '35%', class: 'indeterminate', text: 'En route — track it on the live board' };
-    } else if (flight.status === 'Cancelled') {
-        progressHtml = { width: '0%', class: '', text: 'Cancelled' };
-    } else if (flight.status === 'Delayed') {
-        progressHtml = { width: '0%', class: '', text: 'Delayed — watch the live board for updates' };
-    } else {
-        progressHtml = { width: '0%', class: '', text: flight.status };
+function renderFidsBoard(listElement, flights) {
+    if (!flights.length) {
+        listElement.innerHTML = `
+            <div class="empty-state">
+                No flights are scheduled for this week yet. New flights appear here as soon as operations publish them.
+            </div>
+        `;
+        return;
     }
-
-    const item = document.createElement('div');
-    item.className = 'flight-item';
-    item.dataset.scheduled = flight.scheduledTs;
-    item.dataset.search = `${flight.flightNumber} ${flight.destination} ${code}`.toLowerCase();
-    item.innerHTML = `
-        <div class="flight-info">
-            <div class="flight-route">
-                <span class="city">${isDeparture ? 'DXB' : code}</span>
-                <i class="fas fa-long-arrow-alt-right"></i>
-                <span class="city">${isDeparture ? code : 'DXB'}</span>
-            </div>
-            <div class="flight-details">
-                ${logo ? `<img src="${logo.src}" alt="${logo.alt}" class="tail-logo">` : ''}
-                <span class="flight-number">${flight.flightNumber}</span>
-                <span class="flight-type-tag">${isDeparture ? 'DEP' : 'ARR'}</span>
-                <span class="flight-status ${statusClass}">${flight.status}</span>
-                ${eventLink}
-            </div>
-        </div>
-        <div class="flight-progress">
-            <div class="progress-bar">
-                <div class="progress-fill ${progressHtml.class}" style="width: ${progressHtml.width}"></div>
-            </div>
-            <div class="progress-text">${progressHtml.text}</div>
-        </div>
-        <div class="flight-meta">
-            <div class="meta-item">
-                <span class="meta-label">Date</span>
-                <span class="meta-value">${flight.dateLabel}</span>
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">${isDeparture ? 'Departure' : 'Arrival'}</span>
-                <span class="meta-value">${time} GMT</span>
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Aircraft</span>
-                <span class="meta-value">${flight.aircraft || 'TBD'}</span>
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Terminal</span>
-                <span class="meta-value">${flight.terminal || 'TBD'}</span>
-            </div>
-        </div>
-    `;
-    return item;
+    const groups = flights.reduce((all, flight) => {
+        (all[flight.date] ||= []).push(flight);
+        return all;
+    }, {});
+    let index = 0;
+    listElement.innerHTML = Object.entries(groups).map(([date, items]) => `
+        <section class="date-group">
+            <h2 class="date-heading">${displayDateFmt.format(new Date(`${date}T00:00:00Z`))}</h2>
+            ${items.map((flight) => flightCardHtml(flight, index++)).join('')}
+        </section>`).join('');
 }
 
 function flightsErrorHtml() {
     return `
-        <div class="flights-empty">
-            <i class="fas fa-plane-slash"></i>
-            <p>The weekly schedule is unavailable right now.</p>
-            <a href="${FIDS_URL}/departures" target="_blank" rel="noopener" class="btn outline small">Open the Live Board</a>
+        <div class="empty-state">
+            The weekly schedule is unavailable right now. Try the live board at
+            <a href="${FIDS_URL}/departures" target="_blank" rel="noopener">emirates-ptfs-fids.onrender.com</a>.
         </div>
     `;
 }
@@ -287,41 +254,30 @@ async function initWeeklyFlightsPage() {
     const list = document.getElementById('weekly-flights-list');
     if (!list) return;
 
-    const range = document.getElementById('week-range');
-    if (range) {
-        const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short' });
-        range.textContent = `· ${fmt.format(gmtWeekStart())} – ${fmt.format(addUtcDays(gmtWeekStart(), 6))} GMT`;
-    }
-
     const searchInput = document.getElementById('flight-search');
-    const searchButton = document.getElementById('flight-search-btn');
+    const resultCount = document.getElementById('result-count');
 
+    let allFlights = [];
     const applyFilter = () => {
+        if (!allFlights.length && !list.querySelector('.flight-card')) return;
         const query = (searchInput?.value || '').trim().toLowerCase();
-        list.querySelectorAll('.flight-item').forEach((item) => {
-            item.style.display = !query || item.dataset.search.includes(query) ? '' : 'none';
-        });
+        const visible = allFlights.filter((flight) =>
+            [flight.flightNumber, flight.destination, flight.aircraft, flight.status]
+                .some((value) => String(value || '').toLowerCase().includes(query)));
+        if (resultCount) resultCount.textContent = `${visible.length} ${visible.length === 1 ? 'flight' : 'flights'} shown`;
+        if (!visible.length && query) {
+            list.innerHTML = '<div class="empty-state">No flights match that search. Try a flight number, destination or aircraft.</div>';
+        } else {
+            renderFidsBoard(list, visible);
+        }
     };
     if (searchInput) searchInput.addEventListener('input', applyFilter);
-    if (searchButton) searchButton.addEventListener('click', applyFilter);
-    if (searchInput) searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') applyFilter();
-    });
 
     const load = async () => {
         try {
-            const flights = await fetchWeeklyFlights();
-            list.innerHTML = '';
-            if (!flights.length) {
-                list.innerHTML = `
-                    <div class="flights-empty">
-                        <i class="fas fa-calendar-times"></i>
-                        <p>No flights are scheduled for this week yet. New flights appear here as soon as operations publish them.</p>
-                    </div>
-                `;
-            } else {
-                flights.forEach((flight) => list.appendChild(renderFlightItem(flight)));
-            }
+            allFlights = await fetchWeeklyFlights();
+            if (resultCount) resultCount.textContent = `${allFlights.length} ${allFlights.length === 1 ? 'flight' : 'flights'} shown`;
+            renderFidsBoard(list, allFlights);
             const updateTimeElement = document.getElementById('update-time');
             if (updateTimeElement) updateTimeElement.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         } catch (error) {
@@ -332,7 +288,6 @@ async function initWeeklyFlightsPage() {
 
     await load();
     setInterval(load, 5 * 60 * 1000);
-    setInterval(refreshCountdowns, 30 * 1000);
 }
 
 // Home page preview: the next few upcoming departures
@@ -341,23 +296,18 @@ async function initHomePreview() {
     if (!container) return;
 
     const render = (flights) => {
-        container.innerHTML = '';
         const heroFlightCount = document.getElementById('hero-flight-count');
         if (heroFlightCount) heroFlightCount.textContent = flights.length.toLocaleString();
         const upcoming = flights.filter((flight) => flight.scheduledTs > Date.now()).slice(0, 4);
         if (!upcoming.length) {
             container.innerHTML = `
-                <div class="flights-empty">
-                    <i class="fas fa-calendar-times"></i>
-                    <p>No upcoming flights this week — check back after the next Sunday schedule drop.</p>
+                <div class="empty-state">
+                    No upcoming flights this week — check back after the next Sunday schedule drop.
                 </div>
             `;
             return;
         }
-        const list = document.createElement('div');
-        list.className = 'flights-list';
-        upcoming.forEach((flight) => list.appendChild(renderFlightItem(flight)));
-        container.appendChild(list);
+        container.innerHTML = upcoming.map((flight, index) => flightCardHtml(flight, index)).join('');
     };
 
     try {
@@ -369,17 +319,6 @@ async function initHomePreview() {
     setInterval(async () => {
         try { render(await fetchWeeklyFlights()); } catch (error) { console.warn('Home flight preview refresh failed:', error); }
     }, 5 * 60 * 1000);
-    setInterval(refreshCountdowns, 30 * 1000);
-}
-
-// Keep "Departs in ..." labels fresh without refetching
-function refreshCountdowns() {
-    document.querySelectorAll('.flight-item[data-scheduled]').forEach((item) => {
-        const ts = Number(item.dataset.scheduled);
-        if (!(ts > Date.now())) return;
-        const text = item.querySelector('.progress-text');
-        if (text && text.textContent.startsWith('Departs in')) text.textContent = countdownText(ts) || text.textContent;
-    });
 }
 
 // Flight status functionality
@@ -665,6 +604,53 @@ function initMarquee() {
     if (track) track.innerHTML += track.innerHTML;
 }
 
+// Flip clock, ported from the FIDS live clock
+let previousClockValue = '';
+let clockCleanupTimer;
+
+function updateFlipClock() {
+    const liveClock = document.getElementById('live-clock');
+    if (!liveClock) return;
+
+    const clockValue = new Intl.DateTimeFormat('en-GB', {
+        hour: '2-digit', minute: '2-digit', hour12: false
+    }).format(new Date()).replace(/\D/g, '');
+
+    const cards = clockValue.split('').map((digit, index) => {
+        const previous = previousClockValue[index] || digit;
+        const changed = Boolean(previousClockValue) && previous !== digit;
+        return `<span class="flip-card${changed ? ' is-flipping' : ''}">
+            <span class="flip-card-face flip-card-current">${previous}</span>
+            ${changed ? `<span class="flip-card-face flip-card-next">${digit}</span>` : ''}
+        </span>`;
+    });
+    cards.splice(2, 0, '<span class="flip-separator" aria-hidden="true">:</span>');
+    liveClock.innerHTML = cards.join('');
+    liveClock.setAttribute('aria-label', `Current local time ${clockValue.slice(0, 2)}:${clockValue.slice(2)}`);
+    previousClockValue = clockValue;
+
+    if (liveClock.querySelector('.is-flipping')) {
+        window.clearTimeout(clockCleanupTimer);
+        clockCleanupTimer = window.setTimeout(() => {
+            liveClock.querySelectorAll('.is-flipping').forEach((card) => {
+                const nextDigit = card.querySelector('.flip-card-next')?.textContent;
+                card.classList.remove('is-flipping');
+                card.innerHTML = `<span class="flip-card-face flip-card-current">${nextDigit}</span>`;
+            });
+        }, 700);
+    }
+}
+
+function initFlipClock() {
+    if (!document.getElementById('live-clock')) return;
+    updateFlipClock();
+    const delay = 60_100 - (Date.now() % 60_000);
+    window.setTimeout(() => {
+        updateFlipClock();
+        window.setInterval(updateFlipClock, 60_000);
+    }, delay);
+}
+
 // Join page specific functionality
 function initJoinPage() {
     setInterval(updateDiscordActivity, 15000);
@@ -886,20 +872,17 @@ function reinitComponents() {
     });
 }
 
-// Video background fallback: if the hero video cannot load, hide the video
-// layer entirely so the image background beneath it shows instead.
+// Video fallback: if the fleet video cannot load, hide it so the
+// photographic background beneath the frame shows instead.
 window.addEventListener('load', function() {
     const video = document.getElementById('bg-video');
     if (!video) return;
 
-    const hideVideoLayer = () => {
-        const videoBackground = document.querySelector('.video-background');
-        if (videoBackground) videoBackground.classList.add('video-unavailable');
-    };
+    const hideVideo = () => video.closest('.fleet-video-frame')?.classList.add('video-unavailable');
 
-    video.addEventListener('error', hideVideoLayer);
+    video.addEventListener('error', hideVideo);
     setTimeout(function() {
-        if (video.readyState === 0) hideVideoLayer();
+        if (video.readyState === 0) hideVideo();
     }, 3000);
 });
 

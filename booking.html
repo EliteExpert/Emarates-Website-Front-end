@@ -19,29 +19,25 @@
     <!-- Page Header -->
     <section class="page-header">
         <div class="container">
-            <h1>Weekly Flight Schedule</h1>
-            <p>Every departure and arrival for this week, straight from flight operations</p>
+            <div>
+                <p class="eyebrow">Dubai · UAE</p>
+                <h1>Weekly Flights</h1>
+                <p class="intro">Every departure and arrival for this week, straight from flight operations.</p>
+            </div>
+            <div class="flip-clock" id="live-clock" aria-label="Current GMT time" role="timer"></div>
         </div>
     </section>
 
-    <!-- Weekly Flights Section (same layout as Flight Status) -->
+    <!-- Weekly Flights Section (FIDS board) -->
     <section class="status-section">
         <div class="container">
-            <div class="status-search">
-                <h3>Find a Flight</h3>
-                <div class="search-form">
-                    <input type="text" placeholder="Enter a flight number or destination (e.g., EK247 or LHR)" id="flight-search">
-                    <button class="btn primary" id="flight-search-btn">Search</button>
-                </div>
-            </div>
-
-            <div class="status-container">
-                <div class="status-header">
-                    <h3>This Week's Flights <span class="week-range" id="week-range"></span></h3>
-                    <div class="last-updated">Last updated: <span id="update-time">Just now</span></div>
-                </div>
-
-                <div class="flights-list" id="weekly-flights-list">
+            <section class="flight-panel" aria-label="Weekly flight search and results">
+                <label class="search" for="flight-search">
+                    <span aria-hidden="true">⌕</span>
+                    <input id="flight-search" type="search" placeholder="Search by flight number, destination or aircraft" autocomplete="off">
+                </label>
+                <p class="result-count" id="result-count" aria-live="polite"></p>
+                <div id="weekly-flights-list" aria-live="polite">
                     <div class="flights-loading">
                         <i class="fas fa-circle-notch fa-spin"></i>
                         <p>Loading this week's schedule from flight operations…</p>
@@ -49,12 +45,12 @@
                 </div>
 
                 <div class="discord-integration">
-                    <p>This schedule is published every Sunday at 00:00 GMT and updated live by our flight operations team</p>
+                    <p>Published every Sunday at 00:00 GMT · Last updated: <span id="update-time">just now</span></p>
                     <a href="https://emirates-ptfs-fids.onrender.com/departures" target="_blank" rel="noopener" class="discord-link">
                         <i class="fas fa-tv"></i> View the Live Departures Board
                     </a>
                 </div>
-            </div>
+            </section>
         </div>
     </section>
 

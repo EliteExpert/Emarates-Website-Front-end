@@ -16,32 +16,30 @@
     <!-- Header -->
     <div id="header"></div>
 
-    <!-- Immersive Hero -->
+    <!-- FIDS-style Hero -->
     <section class="home-section">
-        <div class="video-background">
-            <video autoplay muted loop playsinline id="bg-video">
-                <source src="https://assets.mixkit.co/videos/preview/mixkit-airplane-flying-in-the-sky-42937-large.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <div class="video-overlay"></div>
-        </div>
-        <div class="home-content">
-            <p class="hero-eyebrow">Fly the real routes. Join the crew.</p>
-            <h1 class="home-title">Emirates PTFS</h1>
-            <p class="home-subtitle">Experience Premium Flight Simulation</p>
-            <p class="home-description">Join thousands of aviation enthusiasts in our realistic flight simulation community</p>
-            <div class="home-buttons">
-                <a href="booking.html" class="btn primary large"><i class="fas fa-calendar-week"></i> Weekly Flights</a>
-                <a href="https://discord.gg/PJVAvbJbdn" target="_blank" rel="noopener" class="btn secondary large"><i class="fab fa-discord"></i> Join Community</a>
-            </div>
-            <div class="hero-live">
-                <div class="hero-pill">
-                    <span class="live-dot"></span>
-                    <strong id="hero-member-count">—</strong> members in the server
+        <div class="container">
+            <div class="home-content">
+                <p class="hero-eyebrow">Dubai · UAE</p>
+                <h1 class="home-title">Emirates PTFS</h1>
+                <p class="home-subtitle">Experience Premium Flight Simulation</p>
+                <p class="home-description">Join thousands of aviation enthusiasts in our realistic flight simulation community</p>
+                <div class="home-buttons">
+                    <a href="booking.html" class="btn primary large"><i class="fas fa-calendar-week"></i> Weekly Flights</a>
+                    <a href="https://discord.gg/PJVAvbJbdn" target="_blank" rel="noopener" class="btn secondary large"><i class="fab fa-discord"></i> Join Community</a>
                 </div>
-                <div class="hero-pill">
-                    <i class="fas fa-plane-departure"></i>
-                    <strong id="hero-flight-count">—</strong> flights this week
+                <div class="hero-live">
+                    <div class="hero-pill">
+                        <span class="live-dot"></span>
+                        <strong id="hero-member-count">—</strong> members in the server
+                    </div>
+                    <div class="hero-pill">
+                        <i class="fas fa-plane-departure"></i>
+                        <strong id="hero-flight-count">—</strong> flights this week
+                    </div>
+                </div>
+                <div class="home-hero-clock">
+                    <div class="flip-clock" id="live-clock" aria-label="Current GMT time" role="timer"></div>
                 </div>
             </div>
         </div>
@@ -100,6 +98,19 @@
                     <h3>24/7 Support</h3>
                     <p>Get help from our dedicated team of staff and experienced community members.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fleet Video Band -->
+    <section class="fleet-video-section">
+        <div class="container">
+            <div class="fleet-video-frame reveal">
+                <video autoplay muted loop playsinline id="bg-video">
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-airplane-flying-in-the-sky-42937-large.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <span class="fleet-video-caption">Fly the real routes</span>
             </div>
         </div>
     </section>
