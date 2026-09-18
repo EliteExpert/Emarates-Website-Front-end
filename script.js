@@ -45,8 +45,6 @@ async function initAll() {
     initNavigation();
     initSmoothScrolling();
     initFlightStatus();
-    initDiscordLogin();
-    initModal();
     initDiscordStats();
     initScrollReveal();
     initCounters();
@@ -54,10 +52,6 @@ async function initAll() {
     initMarquee();
     initFlipClock();
     initPageFeatures();
-
-    // Check authentication
-    const userData = await checkAuth();
-    updateUIForAuth(userData);
 
     // Set active navigation link
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -336,40 +330,6 @@ function updateFlightStatus() {
     }
 }
 
-// Discord login functionality
-function initDiscordLogin() {
-    const discordLoginBtn = document.getElementById('discord-login');
-    if (!discordLoginBtn) return;
-    
-    discordLoginBtn.addEventListener('click', function() {
-        window.location.href = `${BACKEND_URL}/auth/discord`;
-    });
-}
-
-// Modal functionality
-function initModal() {
-    const modal = document.getElementById('login-modal');
-    const closeBtn = document.querySelector('.close-modal');
-    
-    if (!modal || !closeBtn) return;
-    
-    closeBtn.addEventListener('click', function() {
-        modal.style.display = 'none';
-    });
-    
-    window.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-    
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.style.display === 'block') {
-            modal.style.display = 'none';
-        }
-    });
-}
-
 // Community statistics (member and online counts are live from Discord)
 function updateCommunityStats() {
     const flightCount = document.getElementById('flight-count');
@@ -429,69 +389,6 @@ async function checkAuth() {
     }
 }
 
-function updateUIForAuth(userData) {
-    const discordLoginBtn = document.getElementById('discord-login');
-    const userInfoContainer = document.getElementById('user-info-container');
-    const userWelcome = document.getElementById('user-welcome');
-    const myFlightsNavItem = document.querySelector('.nav-item a[href="my-flights.html"]')?.closest('.nav-item');
-    
-    if (userData.logged_in) {
-        // Hide login button
-        if (discordLoginBtn) {
-            discordLoginBtn.style.display = 'none';
-        }
-        
-        // Show user info
-        if (userInfoContainer) {
-            const avatarUrl = userData.user.avatar 
-                ? `https://cdn.discordapp.com/avatars/${userData.user.id}/${userData.user.avatar}.png?size=64`
-                : 'https://cdn.discordapp.com/embed/avatars/0.png';
-            
-            userInfoContainer.innerHTML = `
-                <div class="user-info">
-                    <img src="${avatarUrl}" alt="Avatar" class="user-avatar">
-                    <span class="user-name">${userData.user.global_name || userData.user.username}</span>
-                </div>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            `;
-            userInfoContainer.style.display = 'flex';
-        }
-        
-        // Show welcome message
-        if (userWelcome) {
-            userWelcome.innerHTML = `Welcome, ${userData.user.global_name || userData.user.username}!`;
-            userWelcome.style.display = 'block';
-        }
-        
-        // Show My Flights in navigation
-        if (myFlightsNavItem) {
-            myFlightsNavItem.style.display = 'list-item';
-        }
-    } else {
-        // Show login button
-        if (discordLoginBtn) {
-            discordLoginBtn.style.display = 'flex';
-        }
-        
-        // Hide user info
-        if (userInfoContainer) {
-            userInfoContainer.style.display = 'none';
-        }
-        
-        // Hide welcome message
-        if (userWelcome) {
-            userWelcome.style.display = 'none';
-        }
-        
-        // Hide My Flights in navigation
-        if (myFlightsNavItem) {
-            myFlightsNavItem.style.display = 'none';
-        }
-    }
-}
-
 // Logout function
 function logout() {
     removeToken();
@@ -506,35 +403,11 @@ function initPageFeatures() {
         initWeeklyFlightsPage();
     } else if (currentPage === 'index.html') {
         initHomePreview();
-    } else if (currentPage === 'status.html') {
-        initStatusPage();
     } else if (currentPage === 'join.html') {
         initJoinPage();
     } else if (currentPage === 'my-flights.html') {
         initializeMyFlightsDirect();
     }
-}
-
-// Status page specific functionality
-function initStatusPage() {
-    const searchInput = document.getElementById('flight-search');
-    const searchButton = document.getElementById('flight-search-btn') || document.querySelector('.status-search .btn');
-
-    if (!searchInput) return;
-
-    const applyFilter = () => {
-        const query = searchInput.value.trim().toLowerCase();
-        document.querySelectorAll('.flights-list .flight-item').forEach((item) => {
-            const haystack = item.textContent.toLowerCase();
-            item.style.display = !query || haystack.includes(query) ? '' : 'none';
-        });
-    };
-
-    if (searchButton) searchButton.addEventListener('click', applyFilter);
-    searchInput.addEventListener('input', applyFilter);
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') applyFilter();
-    });
 }
 
 // Scroll-reveal animations (applied site-wide to common cards and sections)
@@ -856,14 +729,7 @@ async function cancelFlight(pnr) {
 // Global function to reinitialize components
 function reinitComponents() {
     initNavigation();
-    initDiscordLogin();
-    initModal();
-    
-    // Re-check auth and update UI
-    checkAuth().then(userData => {
-        updateUIForAuth(userData);
-    });
-    
+
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.nav-link').forEach(link => {
         if (link.getAttribute('href') === currentPage) {
