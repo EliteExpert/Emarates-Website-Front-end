@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-        <meta name="theme-color" content="#d71921">
+    <meta name="theme-color" content="#d71921">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Emirates PTFS — a premium flight simulation community. Fly real routes, join weekly scheduled flights, and climb the Skywards tiers.">
     <title>Emirates PTFS - Premium Flight Experience</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,30 +16,61 @@
     <!-- Header -->
     <div id="header"></div>
 
-    <!-- Home Section with Video Background -->
+    <!-- Immersive Hero -->
     <section class="home-section">
         <div class="video-background">
-            <video autoplay muted loop id="bg-video">
+            <video autoplay muted loop playsinline id="bg-video">
                 <source src="https://assets.mixkit.co/videos/preview/mixkit-airplane-flying-in-the-sky-42937-large.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
             <div class="video-overlay"></div>
         </div>
         <div class="home-content">
+            <p class="hero-eyebrow">Fly the real routes. Join the crew.</p>
             <h1 class="home-title">Emirates PTFS</h1>
             <p class="home-subtitle">Experience Premium Flight Simulation</p>
             <p class="home-description">Join thousands of aviation enthusiasts in our realistic flight simulation community</p>
             <div class="home-buttons">
-                <a href="booking.html" class="btn primary">Book a Flight</a>
-                <a href="join.html" class="btn secondary">Join Community</a>
+                <a href="booking.html" class="btn primary large"><i class="fas fa-calendar-week"></i> Weekly Flights</a>
+                <a href="https://discord.gg/PJVAvbJbdn" target="_blank" rel="noopener" class="btn secondary large"><i class="fab fa-discord"></i> Join Community</a>
+            </div>
+            <div class="hero-live">
+                <div class="hero-pill">
+                    <span class="live-dot"></span>
+                    <strong id="hero-member-count">—</strong> members in the server
+                </div>
+                <div class="hero-pill">
+                    <i class="fas fa-plane-departure"></i>
+                    <strong id="hero-flight-count">—</strong> flights this week
+                </div>
+            </div>
+        </div>
+        <a href="#upcoming" class="scroll-cue" aria-label="Scroll to this week's flights">
+            <i class="fas fa-chevron-down"></i>
+        </a>
+    </section>
+
+    <!-- This Week in the Air -->
+    <section class="features-section home-preview" id="upcoming">
+        <div class="container">
+            <h2 class="section-title reveal">This Week in the Air</h2>
+            <p class="section-subtitle reveal">Live from flight operations — the next departures on the schedule</p>
+            <div class="status-container home-preview-container reveal" id="home-flights-preview">
+                <div class="flights-loading">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <p>Fetching this week's schedule…</p>
+                </div>
+            </div>
+            <div class="home-preview-actions reveal">
+                <a href="booking.html" class="btn outline large">View the Full Weekly Schedule <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="features-section">
+    <section class="features-section" style="background: var(--light);">
         <div class="container">
-            <h2 class="section-title">Why Choose Emirates PTFS?</h2>
+            <h2 class="section-title reveal">Why Choose Emirates PTFS?</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
@@ -73,26 +104,56 @@
         </div>
     </section>
 
+    <!-- Destination Marquee -->
+    <section class="marquee-section" aria-hidden="true">
+        <div class="marquee-track" id="marquee-track">
+            <span class="marquee-item"><strong>DXB</strong> Dubai</span>
+            <span class="marquee-item"><strong>JFK</strong> New York</span>
+            <span class="marquee-item"><strong>LHR</strong> London</span>
+            <span class="marquee-item"><strong>CDG</strong> Paris</span>
+            <span class="marquee-item"><strong>SIN</strong> Singapore</span>
+            <span class="marquee-item"><strong>SYD</strong> Sydney</span>
+            <span class="marquee-item"><strong>NRT</strong> Tokyo</span>
+            <span class="marquee-item"><strong>JNB</strong> Johannesburg</span>
+            <span class="marquee-item"><strong>GRU</strong> São Paulo</span>
+            <span class="marquee-item"><strong>LAX</strong> Los Angeles</span>
+            <span class="marquee-item"><strong>BKK</strong> Bangkok</span>
+            <span class="marquee-item"><strong>HKG</strong> Hong Kong</span>
+        </div>
+    </section>
+
     <!-- Stats Section -->
     <section class="stats-section">
         <div class="container">
             <div class="stats-grid">
-                <div class="stat">
-                    <div class="stat-number">10+</div>
+                <div class="stat reveal">
+                    <div class="stat-number" data-count="10" data-suffix="+">10+</div>
                     <div class="stat-label">Active Pilots</div>
                 </div>
-                <div class="stat">
-                    <div class="stat-number">40+</div>
+                <div class="stat reveal">
+                    <div class="stat-number" data-count="40" data-suffix="+">40+</div>
                     <div class="stat-label">Flights Completed</div>
                 </div>
-                <div class="stat">
-                    <div class="stat-number">150+</div>
+                <div class="stat reveal">
+                    <div class="stat-number" data-count="150" data-suffix="+">150+</div>
                     <div class="stat-label">Destinations</div>
                 </div>
-                <div class="stat">
+                <div class="stat reveal">
                     <div class="stat-number">24/7</div>
                     <div class="stat-label">Operations</div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Band -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="reveal">Ready for Departure?</h2>
+            <p class="reveal">Cabin crew, prepare for boarding. Your seat in the community is waiting.</p>
+            <div class="home-buttons reveal">
+                <a href="https://discord.gg/PJVAvbJbdn" target="_blank" rel="noopener" class="btn primary large"><i class="fab fa-discord"></i> Join Our Discord</a>
+                <a href="join.html" class="btn secondary large">Learn More</a>
             </div>
         </div>
     </section>
@@ -104,34 +165,26 @@
 <script>
     // Load header and footer components
     document.addEventListener('DOMContentLoaded', function() {
-        // Load header if element exists
         const headerElement = document.getElementById('header');
         if (headerElement) {
             fetch('components/header.html')
                 .then(response => response.text())
                 .then(data => {
                     headerElement.innerHTML = data;
-                    // Re-initialize components after loading
                     reinitComponents();
                 })
-                .catch(error => {
-                    console.error('Error loading header:', error);
-                });
+                .catch(error => console.error('Error loading header:', error));
         }
-        
-        // Load footer if element exists
+
         const footerElement = document.getElementById('footer');
         if (footerElement) {
             fetch('components/footer.html')
                 .then(response => response.text())
                 .then(data => {
                     footerElement.innerHTML = data;
-                    // Re-initialize modal after loading
                     initModal();
                 })
-                .catch(error => {
-                    console.error('Error loading footer:', error);
-                });
+                .catch(error => console.error('Error loading footer:', error));
         }
     });
 </script>

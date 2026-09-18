@@ -136,6 +136,8 @@ header {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    /* Shown while the video loads or if it fails; the video covers it when playing. */
+    background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80') center/cover no-repeat;
 }
 
 #bg-video {
@@ -3130,4 +3132,307 @@ img.lazy-loaded {
     padding: 1.5rem 1rem;
     margin: 0 -0.5rem 1.5rem;
   }
+}
+/* ================================================
+   IMMERSIVE HOME & WEEKLY FLIGHTS ADDITIONS
+   (design language unchanged: red/yellow/dark)
+   ================================================ */
+
+/* Hero extras */
+.hero-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--secondary);
+    margin-bottom: 1rem;
+    animation: heroFadeUp 0.8s ease both;
+}
+
+.home-title, .home-subtitle, .home-description, .home-buttons, .hero-live {
+    animation: heroFadeUp 0.8s ease both;
+}
+
+.home-subtitle { animation-delay: 0.1s; }
+.home-description { animation-delay: 0.2s; }
+.home-buttons { animation-delay: 0.3s; }
+.hero-live { animation-delay: 0.45s; }
+
+@keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-live {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2.5rem;
+}
+
+.hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(6px);
+    color: white;
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+}
+
+.hero-pill strong { color: var(--secondary); }
+.hero-pill i { color: var(--secondary); }
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    display: inline-block;
+    animation: livePulse 2s ease infinite;
+}
+
+@keyframes livePulse {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--success);
+    background: #e7f7ef;
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+}
+
+.scroll-cue {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    opacity: 0.8;
+    font-size: 1.4rem;
+    animation: cueBounce 2s ease infinite;
+    z-index: 2;
+}
+
+.scroll-cue:hover { opacity: 1; color: var(--secondary); }
+
+@keyframes cueBounce {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 10px); }
+}
+
+/* Home weekly preview */
+.home-preview { background: white; }
+
+.home-preview-container {
+    margin-top: 2rem;
+    text-align: left;
+}
+
+.home-preview-actions {
+    text-align: center;
+    margin-top: 2.5rem;
+}
+
+/* Destination marquee */
+.marquee-section {
+    background: var(--dark);
+    padding: 1.8rem 0;
+    overflow: hidden;
+    border-top: 3px solid var(--primary);
+    border-bottom: 3px solid var(--primary);
+}
+
+.marquee-track {
+    display: flex;
+    gap: 3.5rem;
+    white-space: nowrap;
+    width: max-content;
+    animation: marqueeScroll 40s linear infinite;
+}
+
+.marquee-item {
+    color: #ccc;
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.marquee-item strong {
+    color: var(--secondary);
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+@keyframes marqueeScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+/* CTA band */
+.cta-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    text-align: center;
+    padding: 7rem 0;
+}
+
+.cta-section h2 {
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+}
+
+.cta-section p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 2.5rem;
+}
+
+/* Weekly flights widgets */
+.week-range {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #ccc;
+    margin-left: 0.5rem;
+}
+
+.tail-logo {
+    height: 26px;
+    width: auto;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.flight-type-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--gray);
+    background: #eef0f2;
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+}
+
+.event-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #5865F2;
+    text-decoration: none;
+    border: 1px solid #5865F2;
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    transition: background 0.3s, color 0.3s;
+}
+
+.event-chip:hover { background: #5865F2; color: white; }
+
+.flight-status.delayed {
+    background: #fde8e8;
+    color: var(--danger);
+}
+
+.flight-status.cancelled {
+    background: #e9ecef;
+    color: var(--gray);
+    text-decoration: line-through;
+}
+
+.progress-fill.indeterminate {
+    background: linear-gradient(90%, var(--primary) 35%, #ff7b80 50%, var(--primary) 65%);
+    background-size: 200% 100%;
+    animation: progressSlide 1.6s linear infinite;
+}
+
+@keyframes progressSlide {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+.flights-loading, .flights-empty {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--gray);
+}
+
+.flights-loading i, .flights-empty i {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 0.8rem;
+    display: block;
+}
+
+.flights-empty .btn { margin-top: 1rem; }
+
+/* Scroll reveals */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Page header immersive touch */
+.page-header h1, .page-header p {
+    animation: heroFadeUp 0.8s ease both;
+}
+
+.page-header p { animation-delay: 0.15s; }
+
+@media (min-width: 993px) {
+    .page-header {
+        background-attachment: fixed;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-live { flex-direction: column; align-items: center; }
+    .marquee-section { padding: 1.2rem 0; }
+    .marquee-item { font-size: 0.9rem; }
+    .marquee-item strong { font-size: 1.1rem; }
+    .cta-section { background-attachment: scroll; padding: 5rem 0; }
+    .cta-section h2 { font-size: 2rem; }
+    .home-title { font-size: 2.6rem; }
+    .tail-logo { height: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .marquee-track { animation: none; }
+    .scroll-cue { animation: none; }
+    .progress-fill.indeterminate { animation: none; }
+    .home-title, .home-subtitle, .home-description, .home-buttons, .hero-live,
+    .hero-eyebrow, .page-header h1, .page-header p { animation: none; }
+}
+
+/* When the hero video cannot load, collapse the layer so the image shows */
+.video-background.video-unavailable video {
+    display: none;
 }

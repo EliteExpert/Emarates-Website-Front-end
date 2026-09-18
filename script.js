@@ -3,6 +3,10 @@
 // BACKEND CONFIGURATION - ADD THIS AT THE TOP
 const BACKEND_URL = "https://emarates-website-production.up.railway.app";
 
+// Flight operations (FIDS) and Discord community sources
+const FIDS_URL = "https://emirates-ptfs-fids.onrender.com";
+const DISCORD_INVITE_CODE = "PJVAvbJbdn";
+
 // JWT Token Management
 function storeToken(token) {
     localStorage.setItem('jwt_token', token);
@@ -40,17 +44,20 @@ async function initAll() {
     initMobileOptimizations();
     initNavigation();
     initSmoothScrolling();
-    initBookingForm();
     initFlightStatus();
     initDiscordLogin();
     initModal();
-    updateCommunityStats();
+    initDiscordStats();
+    initScrollReveal();
+    initCounters();
+    initFooterYear();
+    initMarquee();
     initPageFeatures();
-    
+
     // Check authentication
     const userData = await checkAuth();
     updateUIForAuth(userData);
-    
+
     // Set active navigation link
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -121,65 +128,257 @@ function initSmoothScrolling() {
     });
 }
 
-// Booking form functionality
-function initBookingForm() {
-    const bookingForm = document.getElementById('booking-form');
-    if (!bookingForm) return;
-    
-    // Set minimum date for departure to today
-    const today = new Date().toISOString().split('T')[0];
-    const departureInput = document.getElementById('departure');
-    
-    if (departureInput) {
-        departureInput.min = today;
+// Weekly flights (sourced from the FIDS flight operations service)
+const STATUS_CLASSES = {
+    'Check-in Open': 'scheduled',
+    'Boarding': 'boarding',
+    'Final Call': 'boarding',
+    'Gate Closed': 'scheduled',
+    'Delayed': 'delayed',
+    'Cancelled': 'cancelled',
+    'Departed': 'in-air',
+    'In Flight': 'in-air',
+    'Arrived': 'landed'
+};
+
+const TAIL_LOGOS = {
+    EK: { src: 'assets/emirates-tail.png', alt: 'Emirates' },
+    FZ: { src: 'assets/flydubai-tail.png', alt: 'flydubai' }
+};
+
+function tailLogo(flightNumber) {
+    const match = String(flightNumber || '').trim().toUpperCase().match(/^([A-Z]{2})/);
+    return match ? TAIL_LOGOS[match[1]] : null;
+}
+
+function gmtWeekStart() {
+    const now = new Date();
+    const sunday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - now.getUTCDay()));
+    return sunday;
+}
+
+function addUtcDays(date, days) {
+    const value = new Date(date.getTime());
+    value.setUTCDate(value.getUTCDate() + days);
+    return value;
+}
+
+async function fetchWeeklyFlights() {
+    const response = await fetch(`${FIDS_URL}/api/flights`);
+    if (!response.ok) throw new Error(`Flight service returned HTTP ${response.status}.`);
+    const flights = await response.json();
+    if (!Array.isArray(flights)) throw new Error('Flight service returned an invalid schedule.');
+
+    const weekStart = gmtWeekStart();
+    const weekEnd = addUtcDays(weekStart, 6);
+    const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' });
+
+    return flights
+        .filter((flight) => {
+            const scheduled = flight.date + 'T' + (flight.departureTime || flight.arrivalTime || '00:00') + ':00Z';
+            return scheduled >= weekStart.toISOString().slice(0, 10) + 'T00:00:00Z'
+                && flight.date <= weekEnd.toISOString().slice(0, 10);
+        })
+        .map((flight) => ({ ...flight, scheduledTs: Date.parse(`${flight.date}T${flight.departureTime || flight.arrivalTime || '00:00'}:00Z`) }))
+        .sort((a, b) => a.scheduledTs - b.scheduledTs)
+        .map((flight) => ({ ...flight, dateLabel: fmt.format(new Date(flight.date + 'T00:00:00Z')) }));
+}
+
+function airportCode(destination) {
+    const match = String(destination || '').toUpperCase().match(/\(([A-Z]{3})\)\s*$/);
+    return match ? match[1] : String(destination || '—');
+}
+
+function countdownText(ts) {
+    const remaining = ts - Date.now();
+    if (remaining <= 0) return null;
+    const minutes = Math.ceil(remaining / 60000);
+    if (minutes < 60) return `Departs in ${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `Departs in ${hours}h ${minutes % 60}m`;
+    const days = Math.floor(hours / 24);
+    return `Departs in ${days}d ${hours % 24}h`;
+}
+
+function renderFlightItem(flight) {
+    const isDeparture = flight.type === 'departure';
+    const time = flight.departureTime || flight.arrivalTime || '--:--';
+    const code = airportCode(flight.destination);
+    const statusClass = STATUS_CLASSES[flight.status] || 'scheduled';
+    const logo = tailLogo(flight.flightNumber);
+    const eventLink = typeof flight.discordEvent === 'string' && flight.discordEvent.startsWith('https://discord.com/')
+        ? `<a href="${flight.discordEvent}" target="_blank" rel="noopener" class="event-chip"><i class="fas fa-calendar-check"></i> Event</a>`
+        : '';
+
+    let progressHtml;
+    if (flight.status === 'Arrived') {
+        progressHtml = { width: '100%', class: '', text: 'Arrived at the gate' };
+    } else if (flight.scheduledTs > Date.now()) {
+        progressHtml = { width: '0%', class: '', text: countdownText(flight.scheduledTs) || 'Scheduled' };
+    } else if (['Departed', 'In Flight'].includes(flight.status)) {
+        progressHtml = { width: '35%', class: 'indeterminate', text: 'En route — track it on the live board' };
+    } else if (flight.status === 'Cancelled') {
+        progressHtml = { width: '0%', class: '', text: 'Cancelled' };
+    } else if (flight.status === 'Delayed') {
+        progressHtml = { width: '0%', class: '', text: 'Delayed — watch the live board for updates' };
+    } else {
+        progressHtml = { width: '0%', class: '', text: flight.status };
     }
-    
-    // Form submission
-    bookingForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Get form values
-        const from = document.getElementById('from')?.value || '';
-        const to = document.getElementById('to')?.value || '';
-        const departure = document.getElementById('departure')?.value || '';
-        const passengers = document.getElementById('passengers')?.value || '1';
-        const flightClass = document.getElementById('class')?.value || 'economy';
-        const name = document.getElementById('passenger-name')?.value || '';
-        
-        const token = getToken();
-        if (!token) {
-            alert('Please log in to book flights');
+
+    const item = document.createElement('div');
+    item.className = 'flight-item';
+    item.dataset.scheduled = flight.scheduledTs;
+    item.dataset.search = `${flight.flightNumber} ${flight.destination} ${code}`.toLowerCase();
+    item.innerHTML = `
+        <div class="flight-info">
+            <div class="flight-route">
+                <span class="city">${isDeparture ? 'DXB' : code}</span>
+                <i class="fas fa-long-arrow-alt-right"></i>
+                <span class="city">${isDeparture ? code : 'DXB'}</span>
+            </div>
+            <div class="flight-details">
+                ${logo ? `<img src="${logo.src}" alt="${logo.alt}" class="tail-logo">` : ''}
+                <span class="flight-number">${flight.flightNumber}</span>
+                <span class="flight-type-tag">${isDeparture ? 'DEP' : 'ARR'}</span>
+                <span class="flight-status ${statusClass}">${flight.status}</span>
+                ${eventLink}
+            </div>
+        </div>
+        <div class="flight-progress">
+            <div class="progress-bar">
+                <div class="progress-fill ${progressHtml.class}" style="width: ${progressHtml.width}"></div>
+            </div>
+            <div class="progress-text">${progressHtml.text}</div>
+        </div>
+        <div class="flight-meta">
+            <div class="meta-item">
+                <span class="meta-label">Date</span>
+                <span class="meta-value">${flight.dateLabel}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">${isDeparture ? 'Departure' : 'Arrival'}</span>
+                <span class="meta-value">${time} GMT</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Aircraft</span>
+                <span class="meta-value">${flight.aircraft || 'TBD'}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Terminal</span>
+                <span class="meta-value">${flight.terminal || 'TBD'}</span>
+            </div>
+        </div>
+    `;
+    return item;
+}
+
+function flightsErrorHtml() {
+    return `
+        <div class="flights-empty">
+            <i class="fas fa-plane-slash"></i>
+            <p>The weekly schedule is unavailable right now.</p>
+            <a href="${FIDS_URL}/departures" target="_blank" rel="noopener" class="btn outline small">Open the Live Board</a>
+        </div>
+    `;
+}
+
+// Weekly flights page (booking.html)
+async function initWeeklyFlightsPage() {
+    const list = document.getElementById('weekly-flights-list');
+    if (!list) return;
+
+    const range = document.getElementById('week-range');
+    if (range) {
+        const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short' });
+        range.textContent = `· ${fmt.format(gmtWeekStart())} – ${fmt.format(addUtcDays(gmtWeekStart(), 6))} GMT`;
+    }
+
+    const searchInput = document.getElementById('flight-search');
+    const searchButton = document.getElementById('flight-search-btn');
+
+    const applyFilter = () => {
+        const query = (searchInput?.value || '').trim().toLowerCase();
+        list.querySelectorAll('.flight-item').forEach((item) => {
+            item.style.display = !query || item.dataset.search.includes(query) ? '' : 'none';
+        });
+    };
+    if (searchInput) searchInput.addEventListener('input', applyFilter);
+    if (searchButton) searchButton.addEventListener('click', applyFilter);
+    if (searchInput) searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') applyFilter();
+    });
+
+    const load = async () => {
+        try {
+            const flights = await fetchWeeklyFlights();
+            list.innerHTML = '';
+            if (!flights.length) {
+                list.innerHTML = `
+                    <div class="flights-empty">
+                        <i class="fas fa-calendar-times"></i>
+                        <p>No flights are scheduled for this week yet. New flights appear here as soon as operations publish them.</p>
+                    </div>
+                `;
+            } else {
+                flights.forEach((flight) => list.appendChild(renderFlightItem(flight)));
+            }
+            const updateTimeElement = document.getElementById('update-time');
+            if (updateTimeElement) updateTimeElement.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch (error) {
+            console.error('Weekly flights fetch failed:', error);
+            list.innerHTML = flightsErrorHtml();
+        }
+    };
+
+    await load();
+    setInterval(load, 5 * 60 * 1000);
+    setInterval(refreshCountdowns, 30 * 1000);
+}
+
+// Home page preview: the next few upcoming departures
+async function initHomePreview() {
+    const container = document.getElementById('home-flights-preview');
+    if (!container) return;
+
+    const render = (flights) => {
+        container.innerHTML = '';
+        const heroFlightCount = document.getElementById('hero-flight-count');
+        if (heroFlightCount) heroFlightCount.textContent = flights.length.toLocaleString();
+        const upcoming = flights.filter((flight) => flight.scheduledTs > Date.now()).slice(0, 4);
+        if (!upcoming.length) {
+            container.innerHTML = `
+                <div class="flights-empty">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No upcoming flights this week — check back after the next Sunday schedule drop.</p>
+                </div>
+            `;
             return;
         }
-        
-        try {
-            const response = await fetch(`${BACKEND_URL}/generate_itinerary`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    name: name,
-                    departure: from,
-                    destination: to,
-                    class: flightClass,
-                    departure_date: departure
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                alert(`Flight booked successfully! PNR: ${result.pnr}`);
-                window.location.href = '/my-flights';
-            } else {
-                alert(`Booking failed: ${result.error}`);
-            }
-        } catch (error) {
-            console.error('Booking error:', error);
-            alert('Booking failed. Please try again.');
-        }
+        const list = document.createElement('div');
+        list.className = 'flights-list';
+        upcoming.forEach((flight) => list.appendChild(renderFlightItem(flight)));
+        container.appendChild(list);
+    };
+
+    try {
+        render(await fetchWeeklyFlights());
+    } catch (error) {
+        console.error('Home flight preview failed:', error);
+        container.innerHTML = flightsErrorHtml();
+    }
+    setInterval(async () => {
+        try { render(await fetchWeeklyFlights()); } catch (error) { console.warn('Home flight preview refresh failed:', error); }
+    }, 5 * 60 * 1000);
+    setInterval(refreshCountdowns, 30 * 1000);
+}
+
+// Keep "Departs in ..." labels fresh without refetching
+function refreshCountdowns() {
+    document.querySelectorAll('.flight-item[data-scheduled]').forEach((item) => {
+        const ts = Number(item.dataset.scheduled);
+        if (!(ts > Date.now())) return;
+        const text = item.querySelector('.progress-text');
+        if (text && text.textContent.startsWith('Departs in')) text.textContent = countdownText(ts) || text.textContent;
     });
 }
 
@@ -232,31 +431,42 @@ function initModal() {
     });
 }
 
-// Community statistics
+// Community statistics (member and online counts are live from Discord)
 function updateCommunityStats() {
-    const memberCount = document.getElementById('member-count');
     const flightCount = document.getElementById('flight-count');
-    const onlineCount = document.getElementById('online-count');
     const eventCount = document.getElementById('event-count');
-    
-    if (memberCount) {
-        const baseMembers = 400;
-        const baseFlights = 40;
-        const baseOnline = 5;
-        const baseEvents = 8;
-        
-        const randomMembers = baseMembers + Math.floor(Math.random() * 10);
-        const randomFlights = baseFlights + Math.floor(Math.random() * 1);
-        const randomOnline = baseOnline + Math.floor(Math.random() * 3) - 15;
-        const randomEvents = baseEvents + Math.floor(Math.random() * 10) - 5;
-        
-        memberCount.textContent = `${randomMembers.toLocaleString()}+`;
-        if (flightCount) flightCount.textContent = `${randomFlights.toLocaleString()}+`;
-        if (onlineCount) onlineCount.textContent = `${Math.max(40, randomOnline).toLocaleString()}+`;
-        if (eventCount) eventCount.textContent = `${Math.max(5, randomEvents).toLocaleString()}+`;
-    }
-    
-    setTimeout(updateCommunityStats, 30000);
+
+    if (flightCount && flightCount.dataset.live !== 'true') flightCount.textContent = '40+';
+    if (eventCount) eventCount.textContent = '8+';
+}
+
+// Live Discord member/online counts from the public invite endpoint
+async function initDiscordStats() {
+    const memberCount = document.getElementById('member-count');
+    const onlineCount = document.getElementById('online-count');
+    const heroMemberCount = document.getElementById('hero-member-count');
+    if (!memberCount && !onlineCount && !heroMemberCount) return;
+
+    const update = async () => {
+        try {
+            const response = await fetch(`https://discord.com/api/v9/invites/${DISCORD_INVITE_CODE}?with_counts=true`);
+            if (!response.ok) throw new Error(`Discord invite API returned HTTP ${response.status}.`);
+            const data = await response.json();
+            const members = data.approximate_member_count;
+            const online = data.approximate_presence_count;
+            if (Number.isFinite(members)) {
+                const label = `${members.toLocaleString()}`;
+                if (memberCount) memberCount.textContent = label;
+                if (heroMemberCount) heroMemberCount.textContent = label;
+            }
+            if (Number.isFinite(online) && onlineCount) onlineCount.textContent = online.toLocaleString();
+        } catch (error) {
+            console.warn('Discord member count unavailable:', error);
+        }
+    };
+
+    update();
+    setInterval(update, 60 * 1000);
 }
 
 // Authentication functions
@@ -352,9 +562,11 @@ function logout() {
 // Initialize page-specific functionality
 function initPageFeatures() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    
+
     if (currentPage === 'booking.html') {
-        initBookingPage();
+        initWeeklyFlightsPage();
+    } else if (currentPage === 'index.html') {
+        initHomePreview();
     } else if (currentPage === 'status.html') {
         initStatusPage();
     } else if (currentPage === 'join.html') {
@@ -364,38 +576,93 @@ function initPageFeatures() {
     }
 }
 
-// Booking page specific functionality
-function initBookingPage() {
-    const tripType = document.getElementById('trip-type');
-    const returnField = document.getElementById('return-field');
-    
-    if (tripType && returnField) {
-        tripType.addEventListener('change', function() {
-            returnField.style.display = this.value === 'oneway' ? 'none' : 'block';
-        });
-    }
-}
-
 // Status page specific functionality
 function initStatusPage() {
     const searchInput = document.getElementById('flight-search');
-    const searchButton = document.querySelector('.status-search .btn');
-    
-    if (searchInput && searchButton) {
-        searchButton.addEventListener('click', function() {
-            const flightNumber = searchInput.value.trim().toUpperCase();
-            if (flightNumber) {
-                alert(`Searching for flight ${flightNumber}...`);
-                searchInput.value = '';
+    const searchButton = document.getElementById('flight-search-btn') || document.querySelector('.status-search .btn');
+
+    if (!searchInput) return;
+
+    const applyFilter = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        document.querySelectorAll('.flights-list .flight-item').forEach((item) => {
+            const haystack = item.textContent.toLowerCase();
+            item.style.display = !query || haystack.includes(query) ? '' : 'none';
+        });
+    };
+
+    if (searchButton) searchButton.addEventListener('click', applyFilter);
+    searchInput.addEventListener('input', applyFilter);
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') applyFilter();
+    });
+}
+
+// Scroll-reveal animations (applied site-wide to common cards and sections)
+function initScrollReveal() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const autoSelectors = [
+        '.feature-card', '.class-card', '.career-card', '.event-card',
+        '.benefit', '.step', '.stat-card', '.join-card', '.status-container',
+        '.booking-container', '.community-stats', '.section-title', '.section-subtitle'
+    ];
+    autoSelectors.forEach((selector) => {
+        document.querySelectorAll(selector).forEach((element) => element.classList.add('reveal'));
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                observer.unobserve(entry.target);
             }
         });
-        
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchButton.click();
-            }
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach((element, index) => {
+        element.style.transitionDelay = `${Math.min(index % 4, 3) * 80}ms`;
+        observer.observe(element);
+    });
+}
+
+// Animated number counters for [data-count] stats
+function initCounters() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const element = entry.target;
+            observer.unobserve(element);
+            const target = Number(element.dataset.count);
+            if (!Number.isFinite(target)) return;
+            const suffix = element.dataset.suffix || '';
+            const duration = 1200;
+            const start = performance.now();
+            const tick = (now) => {
+                const progress = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                element.textContent = Math.round(target * eased).toLocaleString() + suffix;
+                if (progress < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
         });
-    }
+    }, { threshold: 0.4 });
+
+    document.querySelectorAll('[data-count]').forEach((element) => observer.observe(element));
+}
+
+// Footer copyright year
+function initFooterYear() {
+    const yearElement = document.getElementById('footer-year');
+    if (yearElement) yearElement.textContent = new Date().getFullYear();
+}
+
+// Duplicate the marquee content so the CSS -50% loop scrolls seamlessly
+function initMarquee() {
+    const track = document.getElementById('marquee-track');
+    if (track) track.innerHTML += track.innerHTML;
 }
 
 // Join page specific functionality
@@ -619,21 +886,20 @@ function reinitComponents() {
     });
 }
 
-// Video background fallback
+// Video background fallback: if the hero video cannot load, hide the video
+// layer entirely so the image background beneath it shows instead.
 window.addEventListener('load', function() {
     const video = document.getElementById('bg-video');
     if (!video) return;
-    
+
+    const hideVideoLayer = () => {
+        const videoBackground = document.querySelector('.video-background');
+        if (videoBackground) videoBackground.classList.add('video-unavailable');
+    };
+
+    video.addEventListener('error', hideVideoLayer);
     setTimeout(function() {
-        if (video.readyState === 0) {
-            const homeSection = document.querySelector('.home-section');
-            if (homeSection) {
-                homeSection.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80")';
-                homeSection.style.backgroundSize = 'cover';
-                homeSection.style.backgroundPosition = 'center';
-                document.querySelector('.video-background').style.display = 'none';
-            }
-        }
+        if (video.readyState === 0) hideVideoLayer();
     }, 3000);
 });
 

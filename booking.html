@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#d71921">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#d71921">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Book a Flight - Emirates PTFS</title>
+    <meta name="description" content="The weekly Emirates PTFS flight schedule — every departure and arrival for this week, straight from flight operations.">
+    <title>Weekly Flights - Emirates PTFS</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
 </head>
 <body>
     <!-- Header -->
@@ -17,110 +19,40 @@
     <!-- Page Header -->
     <section class="page-header">
         <div class="container">
-            <h1>Book Your Flight</h1>
-            <p>Experience world-class service with Emirates PTFS</p>
+            <h1>Weekly Flight Schedule</h1>
+            <p>Every departure and arrival for this week, straight from flight operations</p>
         </div>
     </section>
 
-    <!-- Booking Section -->
-    <section class="booking-section">
+    <!-- Weekly Flights Section (same layout as Flight Status) -->
+    <section class="status-section">
         <div class="container">
-            <div class="booking-container">
-                <div class="booking-content">
-                    <!-- Form on LEFT side - WIDER -->
-                    <div class="booking-form-container">
-                        <form id="booking-form" class="booking-form" onsubmit="return false;">
-                            <div class="form-section">
-                                <h4>Flight Route</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="from">From</label>
-                                        <input type="text" id="from" name="from" placeholder="Enter departure city" required>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="to">To</label>
-                                        <input type="text" id="to" name="to" placeholder="Enter destination city" required>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="status-search">
+                <h3>Find a Flight</h3>
+                <div class="search-form">
+                    <input type="text" placeholder="Enter a flight number or destination (e.g., EK247 or LHR)" id="flight-search">
+                    <button class="btn primary" id="flight-search-btn">Search</button>
+                </div>
+            </div>
 
-                            <div class="form-section">
-                                <h4>Travel Details</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="class">Class</label>
-                                        <select id="class" name="class" required>
-                                            <option value="economy">Economy Class</option>
-                                            <option value="business">Business Class</option>
-                                            <option value="first">First Class</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="passengers">Passengers</label>
-                                        <select id="passengers" name="passengers">
-                                            <option value="1">1 Passenger</option>
-                                            <option value="2">2 Passengers</option>
-                                            <option value="3">3 Passengers</option>
-                                            <option value="4">4 Passengers</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="status-container">
+                <div class="status-header">
+                    <h3>This Week's Flights <span class="week-range" id="week-range"></span></h3>
+                    <div class="last-updated">Last updated: <span id="update-time">Just now</span></div>
+                </div>
 
-                            <div class="form-section">
-                                <h4>Travel Dates</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="departure">Departure Date</label>
-                                        <input type="date" id="departure" name="departure" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="return">Return Date (Optional)</label>
-                                        <input type="date" id="return" name="return">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn primary large full-width">
-                                <i class="fas fa-search"></i> Search Flights
-                            </button>
-                        </form>
+                <div class="flights-list" id="weekly-flights-list">
+                    <div class="flights-loading">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <p>Loading this week's schedule from flight operations…</p>
                     </div>
+                </div>
 
-                    <!-- "Why Fly With Us" on RIGHT side - THINNER -->
-                    <div class="booking-info">
-                        <h3>Why Fly With Emirates PTFS?</h3>
-                        <p class="booking-description">Experience world-class service and premium amenities when you fly with Emirates PTFS.</p>
-                        
-                        <div class="booking-features">
-                            <div class="booking-feature">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Industry-leading safety standards and protocols</span>
-                            </div>
-                            <div class="booking-feature">
-                                <i class="fas fa-check-circle"></i>
-                                <span>World-class hospitality and comfort</span>
-                            </div>
-                            <div class="booking-feature">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Extensive global destinations worldwide</span>
-                            </div>
-                            <div class="booking-feature">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Award-winning service excellence in aviation</span>
-                            </div>
-                            <div class="booking-feature">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Premium in-flight entertainment and dining</span>
-                            </div>
-                            <div class="booking-feature">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Luxurious cabin classes for every traveler</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="discord-integration">
+                    <p>This schedule is published every Sunday at 00:00 GMT and updated live by our flight operations team</p>
+                    <a href="https://emirates-ptfs-fids.onrender.com/departures" target="_blank" rel="noopener" class="discord-link">
+                        <i class="fas fa-tv"></i> View the Live Departures Board
+                    </a>
                 </div>
             </div>
         </div>
@@ -130,125 +62,31 @@
     <div id="footer"></div>
 
     <script src="script.js"></script>
-    <script>
-        let bookingInProgress = false;
-
-        function handleBookingSubmit() {
-            if (bookingInProgress) {
-                console.log('Booking already in progress - blocking duplicate');
-                return false;
-            }
-            
-            bookingInProgress = true;
-            console.log('Booking process started - single submission');
-            
-            const from = document.getElementById('from').value;
-            const to = document.getElementById('to').value;
-            const departure = document.getElementById('departure').value;
-            const passengers = document.getElementById('passengers').value;
-            const flightClass = document.getElementById('class').value;
-            
-            if (!from || !to) {
-                alert('Please enter both departure and destination cities.');
-                bookingInProgress = false;
-                return false;
-            }
-            
-            if (from.toLowerCase() === to.toLowerCase()) {
-                alert('Departure and destination cannot be the same.');
-                bookingInProgress = false;
-                return false;
-            }
-            
-            const submitBtn = document.querySelector('#booking-form button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-            submitBtn.disabled = true;
-            
-            console.log('Sending SINGLE request to server...');
-            
-            fetch('/generate_itinerary', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    departure: from,
-                    destination: to,
-                    class: flightClass,
-                    departure_date: departure,
-                    passengers: passengers
-                })
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log('Server response:', result);
-                if (result.success) {
-                    alert(`Flight booked successfully! PNR: ${result.pnr}`);
-                    window.location.href = '/my-flights';
-                } else {
-                    alert(`Booking failed: ${result.error}`);
-                }
-            })
-            .catch(error => {
-                console.error('Booking error:', error);
-                alert('Booking failed. Please try again.');
-            })
-            .finally(() => {
-                console.log('Booking process completed');
-                bookingInProgress = false;
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            });
-            
-            return false;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded - initializing booking form');
-            
-            // Load header and footer
+<script>
+    // Load header and footer components
+    document.addEventListener('DOMContentLoaded', function() {
+        const headerElement = document.getElementById('header');
+        if (headerElement) {
             fetch('components/header.html')
                 .then(response => response.text())
                 .then(data => {
-                    document.getElementById('header').innerHTML = data;
-                    if (typeof reinitComponents === 'function') {
-                        reinitComponents();
-                    }
-                    document.querySelectorAll('.nav-link').forEach(link => {
-                        if (link.getAttribute('href') === 'booking.html') {
-                            link.classList.add('active');
-                        }
-                    });
-                });
-            
+                    headerElement.innerHTML = data;
+                    reinitComponents();
+                })
+                .catch(error => console.error('Error loading header:', error));
+        }
+
+        const footerElement = document.getElementById('footer');
+        if (footerElement) {
             fetch('components/footer.html')
                 .then(response => response.text())
                 .then(data => {
-                    document.getElementById('footer').innerHTML = data;
-                    if (typeof initModal === 'function') {
-                        initModal();
-                    }
-                });
-
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            const departureInput = document.getElementById('departure');
-            const returnInput = document.getElementById('return');
-            if (departureInput) departureInput.min = today;
-            if (returnInput) returnInput.min = today;
-
-            // Use button click instead of form submit
-            const submitBtn = document.querySelector('#booking-form button[type="submit"]');
-            if (submitBtn) {
-                console.log('Attaching click listener to submit button');
-                submitBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleBookingSubmit();
-                });
-            }
-        });
-    </script>
+                    footerElement.innerHTML = data;
+                    initModal();
+                })
+                .catch(error => console.error('Error loading footer:', error));
+        }
+    });
+</script>
 </body>
 </html>
