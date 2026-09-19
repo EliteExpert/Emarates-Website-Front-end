@@ -756,6 +756,8 @@ header {
 
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
+  .page-banner { animation: none; }
+  .gallery-card img { animation: none; }
   .marquee-track { animation: none; }
   .scroll-cue { animation: none; }
   .progress-fill.indeterminate { animation: none; }
@@ -816,6 +818,13 @@ header {
   font-size: clamp(16px, 2.4vw, 26px); font-weight: 600; letter-spacing: -.02em;
   text-shadow: 0 2px 14px rgb(0 0 0 / .5);
 }
+
+/* Slow drift on banners for a cinematic feel */
+@keyframes bannerDrift {
+  from { background-size: 100% auto; }
+  to { background-size: 112% auto; }
+}
+.page-banner { animation: bannerDrift 26s ease-in-out infinite alternate; }
 
 /* ============ Airline filter tabs (weekly board) ============ */
 .airline-tabs {
@@ -941,6 +950,12 @@ html[data-theme="dark"] body {
 }
 [data-theme="dark"] .scroll-cue { color: #fff; }
 
+/* Primary buttons invert in dark mode: light surface, dark text */
+[data-theme="dark"] .btn.primary { background: #e8eaed; color: #17191b; box-shadow: 0 6px 19px rgb(0 0 0 / .4); }
+[data-theme="dark"] .btn.primary:hover { background: #fff; }
+[data-theme="dark"] .step-number { background: #e8eaed; color: #17191b; }
+[data-theme="dark"] .btn.danger { background: #d45048; }
+
 /* Theme toggle button */
 .theme-toggle {
   display: inline-flex; align-items: center; justify-content: center;
@@ -955,3 +970,36 @@ html[data-theme="dark"] body {
 @media (max-width: 768px) {
   .page-banner { aspect-ratio: 16 / 9; border-radius: 16px; }
 }
+
+/* ============ Home fleet gallery ============ */
+.gallery-section { background: transparent; padding-top: 0; }
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.4rem;
+  margin-top: 2.2rem;
+}
+.gallery-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #e9eaeb;
+  box-shadow: 0 6px 19px rgb(26 31 36 / .07);
+  aspect-ratio: 16 / 10;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.gallery-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgb(26 31 36 / .16); }
+.gallery-card img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform .6s ease;
+}
+.gallery-card:hover img { transform: scale(1.06); }
+.gallery-card figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  padding: 2.2rem 1.2rem .9rem;
+  color: #fff; font-family: "Emirates Medium", Arial, sans-serif;
+  font-size: 1.05rem; font-weight: 600; letter-spacing: -.01em;
+  background: linear-gradient(180deg, transparent, rgba(15, 16, 18, .78));
+}
+[data-theme="dark"] .gallery-card { background: var(--white); border-color: var(--card-line); }
