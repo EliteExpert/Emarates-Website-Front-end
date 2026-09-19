@@ -6,6 +6,14 @@ const BACKEND_URL = "https://emarates-website-production.up.railway.app";
 // Flight operations (FIDS) and Discord community sources
 const FIDS_URL = "https://emirates-ptfs-fids.onrender.com";
 const DISCORD_INVITE_CODE = "PJVAvbJbdn";
+const DISCORD_GUILD_ID = "1294732873143685160";
+const CREW_VOICE_CHANNEL_ID = "1376278983859245147";
+// Discord OAuth2 (implicit) — paste your Discord application's Client ID here
+// and add "<your-site>/index.html" as an OAuth2 redirect URI in the
+// Discord Developer Portal. Leave empty to keep the gallery view-only.
+const DISCORD_OAUTH_CLIENT_ID = "";
+const OAUTH_STORE_KEY = "discord-oauth";
+const GALLERY_STORE_KEY = "crew-gallery";
 
 // JWT Token Management
 function storeToken(token) {
@@ -52,6 +60,9 @@ async function initAll() {
     initMarquee();
     initFlipClock();
     initThemeToggle();
+    initCrewCount();
+    initGalleryTool();
+    initDiscordAuth();
     initPageFeatures();
 
     // Set active navigation link
@@ -503,6 +514,248 @@ function initFooterYear() {
     const yearElement = document.getElementById('footer-year');
     if (yearElement) yearElement.textContent = new Date().getFullYear();
 }
+
+// Live "Crew Members" count from the Discord voice channel.
+// Requires the server's Discord Widget to be enabled (Server Settings ->
+// Widget); falls back to a dash while it is off.
+function initCrewCount() {
+    const crewElement = document.getElementById('crew-count');
+    if (!crewElement) return;
+
+    const update = async () => {
+        try {
+            const response = await fetch(`https://discord.com/api/v9/guilds/${DISCORD_GUILD_ID}/widget.json`);
+            if (!response.ok) throw new Error(`Discord widget returned HTTP ${response.status}.`);
+            const widget = await response.json();
+            const inChannel = (widget.members || []).filter((member) => member.channel_id === CREW_VOICE_CHANNEL_ID);
+            crewElement.textContent = inChannel.length.toLocaleString();
+        } catch (error) {
+            console.warn('Crew voice count unavailable (is the Discord Widget enabled?):', error.message);
+        }
+    };
+
+    update();
+    setInterval(update, 60 * 1000);
+}
+
+// ---- Crew gallery: curated fleet shots + community additions ----
+const GALLERY_CURATED = [
+    { src: 'assets/photos/crew-ek002.png', flight: 'EK002' },
+    { src: 'assets/photos/crew-ek087.png', flight: 'EK087' },
+    { src: 'assets/photos/crew-ek242.png', flight: 'EK242 X AC57' },
+    { src: 'assets/photos/crew-ek2512.png', flight: 'EK 2512' },
+    { src: 'assets/photos/crew-ek356.png', flight: 'EK 356' },
+    { src: 'assets/photos/crew-ek342.png', flight: 'EK 342' },
+    { src: 'assets/photos/crew-ek241.png', flight: 'EK 241 X AC57' },
+    { src: 'assets/photos/fleet-takeoff-day.png', flight: 'Rotation — 777-300ER' },
+    { src: 'assets/photos/fleet-gate-a350.png', flight: 'Gate 25L — A350-900' },
+    { src: 'assets/photos/fleet-sunset-a380.png', flight: 'Sunset departure — A380' },
+    { src: 'assets/photos/fleet-moon-night.png', flight: 'Moonlit climb — A380' }
+];
+
+function loadUserGalleryPhotos() {
+    try { return JSON.parse(localStorage.getItem(GALLERY_STORE_KEY)) || []; }
+    catch { return []; }
+}
+
+function saveUserGalleryPhotos(photos) {
+    localStorage.setItem(GALLERY_STORE_KEY, JSON.stringify(photos.slice(0, 30)));
+}
+
+// Fisher-Yates so the board reads differently on every visit
+function shuffleList(items) {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+function renderGallery() {
+    const grid = document.getElementById('gallery-grid');
+    if (!grid) return;
+
+    const userPhotos = loadUserGalleryPhotos().map((photo) => ({ ...photo, user: true }));
+    const entries = shuffleList([...userPhotos, ...GALLERY_CURATED]);
+
+    grid.innerHTML = '';
+    entries.forEach((entry, index) => {
+        const figure = document.createElement('figure');
+        figure.className = 'gallery-card reveal' + (index % 5 === 0 ? ' gallery-card-wide' : '');
+        const img = document.createElement('img');
+        img.src = entry.src;
+        img.alt = entry.flight;
+        img.loading = 'lazy';
+        img.addEventListener('error', () => figure.remove());
+        const caption = document.createElement('figcaption');
+        caption.innerHTML = `${entry.user ? '<span class="gallery-chip">New</span>' : ''}${escapeHtml(entry.flight)}${entry.by ? ` <span class="gallery-by">· by ${escapeHtml(entry.by)}</span>` : ''}`;
+        figure.append(img, caption);
+        grid.appendChild(figure);
+    });
+
+    // Re-run the reveal observer over the fresh cards
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const observer = new IntersectionObserver((entries2) => {
+            entries2.forEach((entry) => {
+                if (entry.isIntersecting) { entry.target.classList.add('revealed'); observer.unobserve(entry.target); }
+            });
+        }, { threshold: 0.12 });
+        grid.querySelectorAll('.reveal').forEach((element, i) => {
+            element.style.transitionDelay = `${Math.min(i % 4, 3) * 70}ms`;
+            observer.observe(element);
+        });
+    } else {
+        grid.querySelectorAll('.reveal').forEach((element) => element.classList.add('revealed'));
+    }
+}
+
+// ---- Discord OAuth (implicit flow, no server needed) ----
+function getDiscordUser() {
+    try { return JSON.parse(localStorage.getItem('discord-user')); }
+    catch { return null; }
+}
+
+async function fetchDiscordProfile(token) {
+    const response = await fetch('https://discord.com/api/v9/users/@me', {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error(`Discord profile returned HTTP ${response.status}.`);
+    return response.json();
+}
+
+async function initDiscordAuth() {
+    // Capture the implicit-grant token from the URL fragment
+    if (location.hash.includes('access_token')) {
+        const params = new URLSearchParams(location.hash.slice(1));
+        const token = params.get('access_token');
+        const expiresIn = Number(params.get('expires_in')) || 604800;
+        localStorage.setItem(OAUTH_STORE_KEY, JSON.stringify({
+            token, expires_at: Date.now() + expiresIn * 1000
+        }));
+        history.replaceState({}, document.title, location.pathname + location.search);
+    }
+
+    const stored = (() => {
+        try { return JSON.parse(localStorage.getItem(OAUTH_STORE_KEY)); }
+        catch { return null; }
+    })();
+    if (stored?.token && stored.expires_at > Date.now()) {
+        try {
+            const profile = await fetchDiscordProfile(stored.token);
+            localStorage.setItem('discord-user', JSON.stringify({
+                id: profile.id,
+                name: profile.global_name || profile.username,
+                avatar: profile.avatar
+                    ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png?size=64`
+                    : null
+            }));
+        } catch (error) {
+            console.warn('Discord login expired:', error.message);
+            localStorage.removeItem(OAUTH_STORE_KEY);
+            localStorage.removeItem('discord-user');
+        }
+    }
+    renderGalleryTool();
+}
+
+function discordLogout() {
+    localStorage.removeItem(OAUTH_STORE_KEY);
+    localStorage.removeItem('discord-user');
+    renderGalleryTool();
+    renderGallery();
+}
+window.discordLogout = discordLogout;
+
+function renderGalleryTool() {
+    const body = document.querySelector('.gallery-tool-body');
+    if (!body) return;
+    const user = getDiscordUser();
+
+    if (!user) {
+        const loginHref = DISCORD_OAUTH_CLIENT_ID
+            ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(DISCORD_OAUTH_CLIENT_ID)}&redirect_uri=${encodeURIComponent(location.origin + location.pathname)}&response_type=token&scope=identify`
+            : '';
+        body.innerHTML = `
+            <h3>Add a photo to the gallery</h3>
+            <p>Log in with Discord so your photos carry your name on the board.</p>
+            ${loginHref
+                ? `<a class="btn discord-btn full-width" href="${loginHref}"><i class="fab fa-discord"></i> Log in with Discord</a>`
+                : `<p class="gallery-tool-note"><i class="fas fa-circle-info"></i> Discord login is not configured yet — set <code>DISCORD_OAUTH_CLIENT_ID</code> in <code>script.js</code> and allow this site as an OAuth2 redirect.</p>`}
+        `;
+        return;
+    }
+
+    const avatar = user.avatar
+        ? `<img class="gallery-avatar" src="${user.avatar}" alt="">`
+        : '<i class="fas fa-user-astronaut gallery-avatar-icon"></i>';
+    body.innerHTML = `
+        <h3>Add a photo to the gallery</h3>
+        <p>Flew something memorable? Pick the photo, tag it with the flight number, and it joins the board.</p>
+        <div class="gallery-identity">${avatar} Adding as <strong>${escapeHtml(user.name)}</strong>
+            <button type="button" class="gallery-logout" onclick="discordLogout()">Log out</button>
+        </div>
+        <form id="gallery-form">
+            <label class="gallery-file">
+                <input type="file" id="gallery-file" accept="image/*" required>
+                <span id="gallery-file-label"><i class="fas fa-image"></i> Choose a photo</span>
+            </label>
+            <input type="text" id="gallery-flight" placeholder="Flight number (e.g. EK247)" maxlength="24">
+            <button type="submit" class="btn primary">Add to Gallery</button>
+        </form>
+        <p class="gallery-tool-note">Photos you add are kept in this browser and appear first in the rotation.</p>
+    `;
+
+    const form = document.getElementById('gallery-form');
+    const fileInput = document.getElementById('gallery-file');
+    const fileLabel = document.getElementById('gallery-file-label');
+    const flightInput = document.getElementById('gallery-flight');
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        fileLabel.innerHTML = file
+            ? `<i class="fas fa-check"></i> ${escapeHtml(file.name)}`
+            : '<i class="fas fa-image"></i> Choose a photo';
+    });
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const file = fileInput.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            // Downscale so the photo fits comfortably in localStorage
+            const image = new Image();
+            image.onload = () => {
+                const maxSide = 1600;
+                const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(image.width * scale);
+                canvas.height = Math.round(image.height * scale);
+                canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+                const photos = loadUserGalleryPhotos();
+                photos.unshift({
+                    src: canvas.toDataURL('image/jpeg', 0.85),
+                    flight: (flightInput.value || '').trim() || 'Crew photo',
+                    by: getDiscordUser()?.name || 'Crew',
+                    ts: Date.now()
+                });
+                saveUserGalleryPhotos(photos);
+                renderGallery();
+                document.getElementById('gallery-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            image.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function initGalleryTool() {
+    if (!document.getElementById('gallery-tool')) return;
+    renderGallery();
+}
+
 
 // Theme toggle (works with the late-loaded header via delegation)
 function applyTheme(theme) {

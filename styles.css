@@ -944,7 +944,9 @@ html[data-theme="dark"] body {
 [data-theme="dark"] .airline-tab { color: #9aa0a6; }
 [data-theme="dark"] .airline-tab:hover, [data-theme="dark"] .airline-tab.is-active { color: var(--ink); }
 [data-theme="dark"] .airline-tab.is-active { background: #2c3034; }
-[data-theme="dark"] .cta-section { background: linear-gradient(130deg, #101214 0%, #1a1d20 100%); }
+[data-theme="dark"] .cta-section {
+  background: linear-gradient(rgba(10, 11, 13, .78), rgba(10, 11, 13, .78)), url('assets/photos/fleet-moon-night.png') center/cover no-repeat;
+}
 [data-theme="dark"] .stats-section {
   background: linear-gradient(rgba(12, 13, 15, .78), rgba(12, 13, 15, .78)), url('assets/photos/fleet-tokyo-airport.png') center/cover no-repeat;
 }
@@ -1003,3 +1005,73 @@ html[data-theme="dark"] body {
   background: linear-gradient(180deg, transparent, rgba(15, 16, 18, .78));
 }
 [data-theme="dark"] .gallery-card { background: var(--white); border-color: var(--card-line); }
+
+/* ============ Gallery add-photo tool ============ */
+.gallery-tool {
+  margin-top: 2.2rem;
+  background: var(--white);
+  border: 1px solid #e9eaeb;
+  border-radius: 16px;
+  box-shadow: 0 6px 19px rgb(26 31 36 / .055);
+  padding: 1.8rem;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.gallery-tool-body h3 {
+  font-family: "Emirates Medium", Arial, sans-serif;
+  font-weight: 600; font-size: 1.3rem; letter-spacing: -.01em;
+  margin-bottom: .4rem; text-align: center;
+}
+.gallery-tool-body > p { color: var(--muted); font-size: 14px; text-align: center; margin-bottom: 1.2rem; }
+#gallery-form { display: grid; gap: .8rem; }
+#gallery-form input[type="text"] {
+  height: 48px; padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 12px;
+  font-size: 14px; color: var(--ink); background: var(--white); outline: 0;
+  transition: border .2s ease, box-shadow .2s ease;
+}
+#gallery-form input[type="text"]:focus { border-color: #aeb4bb; box-shadow: 0 0 0 3px rgb(35 39 43 / .1); }
+.gallery-file { display: block; }
+.gallery-file input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.gallery-file span {
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  height: 48px; padding: 0 14px;
+  border: 1px dashed #b9bdc3; border-radius: 12px;
+  color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: border-color .2s ease, color .2s ease, background .2s ease;
+}
+.gallery-file span:hover { border-color: #8f959c; color: var(--ink); background: var(--surface); }
+.gallery-tool-note { margin-top: .8rem; color: #a2a6ac; font-size: 12px; text-align: center; }
+
+.gallery-chip {
+  display: inline-block; margin-right: .5rem; padding: .1rem .5rem;
+  border-radius: 999px; background: #f2c94c; color: #17191b;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  vertical-align: middle;
+}
+
+/* Shuffled boards get varied widths so every visit reads differently */
+.gallery-card-wide { grid-column: span 2; }
+@media (max-width: 620px) {
+  .gallery-card-wide { grid-column: span 1; }
+  #gallery-form { grid-template-columns: 1fr; }
+}
+/* Gallery identity (Discord login) */
+.gallery-identity {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .7rem .9rem; margin-bottom: 1rem;
+  background: var(--surface); border-radius: 12px;
+  font-size: 13.5px; color: var(--ink);
+}
+.gallery-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+.gallery-avatar-icon { color: var(--muted); }
+.gallery-identity strong { font-weight: 700; }
+.gallery-logout {
+  margin-left: auto; background: none; border: none;
+  color: var(--muted); font-size: 12.5px; font-weight: 700; cursor: pointer;
+  text-decoration: underline;
+}
+.gallery-logout:hover { color: var(--danger); }
+.gallery-by { color: var(--muted); font-family: Arial, Helvetica, sans-serif; font-size: .78rem; font-weight: 600; }
