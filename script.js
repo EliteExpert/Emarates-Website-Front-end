@@ -713,11 +713,15 @@ function renderGalleryTool() {
         const loginHref = DISCORD_OAUTH_CLIENT_ID
             ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(DISCORD_OAUTH_CLIENT_ID)}&redirect_uri=${encodeURIComponent(location.origin + location.pathname)}&response_type=token&scope=identify`
             : '';
+        const redirectUri = location.origin + location.pathname;
         body.innerHTML = `
             <h3>Add a photo to the gallery</h3>
             <p>Log in with Discord so your photos carry your name on the board.</p>
             ${loginHref
-                ? `<a class="btn discord-btn full-width" href="${loginHref}"><i class="fab fa-discord"></i> Log in with Discord</a>`
+                ? `<a class="btn discord-btn full-width" href="${loginHref}"><i class="fab fa-discord"></i> Log in with Discord</a>
+            <p class="gallery-tool-note">Seeing <strong>invalid oauth2 redirect_uri</strong>? In the Discord Developer Portal → your application → OAuth2 → Redirects, add this exact URL (click to copy) and save:
+            <code class="redirect-uri" title="Click to copy" onclick="navigator.clipboard.writeText('${redirectUri}').then(() => this.classList.add('copied'))">${escapeHtml(redirectUri)}</code>
+            Add one entry per address you use the site on (e.g. your <code>.vercel.app</code> domain and <code>http://127.0.0.1:8901/index.html</code> locally). It must be the same application as the Client ID in <code>script.js</code>.</p>`
                 : `<p class="gallery-tool-note"><i class="fas fa-circle-info"></i> Discord login is not configured yet — set <code>DISCORD_OAUTH_CLIENT_ID</code> in <code>script.js</code> and allow this site as an OAuth2 redirect.</p>`}
         `;
         return;
