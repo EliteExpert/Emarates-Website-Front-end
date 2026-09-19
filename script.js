@@ -11,7 +11,7 @@ const CREW_VOICE_CHANNEL_ID = "1376278983859245147";
 // Discord OAuth2 (implicit) — paste your Discord application's Client ID here
 // and add "<your-site>/index.html" as an OAuth2 redirect URI in the
 // Discord Developer Portal. Leave empty to keep the gallery view-only.
-const DISCORD_OAUTH_CLIENT_ID = "";
+const DISCORD_OAUTH_CLIENT_ID = "1550876222719004703";
 const OAUTH_STORE_KEY = "discord-oauth";
 const GALLERY_STORE_KEY = "crew-gallery";
 
@@ -572,12 +572,35 @@ function shuffleList(items) {
     return copy;
 }
 
+let sharedGalleryPhotos = [];
+let sharedGalleryLoaded = false;
+
+async function loadSharedGalleryPhotos() {
+    try {
+        const response = await fetch('/api/photos');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const body = await response.json();
+        if (Array.isArray(body.photos)) {
+            sharedGalleryPhotos = body.photos;
+            sharedGalleryLoaded = true;
+            renderGallery();
+        }
+    } catch (error) {
+        // Not on Vercel (or Blob not connected): curated + local photos only.
+        console.warn('Shared gallery unavailable:', error.message);
+    }
+}
+
 function renderGallery() {
     const grid = document.getElementById('gallery-grid');
     if (!grid) return;
 
-    const userPhotos = loadUserGalleryPhotos().map((photo) => ({ ...photo, user: true }));
-    const entries = shuffleList([...userPhotos, ...GALLERY_CURATED]);
+    // Server photos win; skip local copies already stored server-side.
+    const localPhotos = loadUserGalleryPhotos().map((photo) => ({ ...photo, user: true }));
+    const localPending = sharedGalleryLoaded
+        ? localPhotos.filter((photo) => !sharedGalleryPhotos.some((shared) => shared.localKey && photo.key && shared.localKey === photo.key))
+        : localPhotos;
+    const entries = shuffleList([...localPending, ...sharedGalleryPhotos.map((photo) => ({ ...photo, shared: true })), ...GALLERY_CURATED]);
 
     grid.innerHTML = '';
     entries.forEach((entry, index) => {
@@ -589,7 +612,8 @@ function renderGallery() {
         img.loading = 'lazy';
         img.addEventListener('error', () => figure.remove());
         const caption = document.createElement('figcaption');
-        caption.innerHTML = `${entry.user ? '<span class="gallery-chip">New</span>' : ''}${escapeHtml(entry.flight)}${entry.by ? ` <span class="gallery-by">· by ${escapeHtml(entry.by)}</span>` : ''}`;
+        const chip = entry.user && !entry.shared ? '<span class="gallery-chip">New</span>' : '';
+        caption.innerHTML = `${chip}${escapeHtml(entry.flight)}${entry.by ? ` <span class="gallery-by">· by ${escapeHtml(entry.by)}</span>` : ''}`;
         figure.append(img, caption);
         grid.appendChild(figure);
     });
@@ -611,6 +635,14 @@ function renderGallery() {
 }
 
 // ---- Discord OAuth (implicit flow, no server needed) ----
+function getDiscordOauthToken() {
+    if (window.__discordToken) return window.__discordToken;
+    try {
+        const stored = JSON.parse(localStorage.getItem(OAUTH_STORE_KEY));
+        return stored?.token && stored.expires_at > Date.now() ? stored.token : null;
+    } catch { return null; }
+}
+
 function getDiscordUser() {
     try { return JSON.parse(localStorage.getItem('discord-user')); }
     catch { return null; }
@@ -640,6 +672,11 @@ async function initDiscordAuth() {
         try { return JSON.parse(localStorage.getItem(OAUTH_STORE_KEY)); }
         catch { return null; }
     })();
+    if (stored?.token && stored.expires_at > Date.now()) {
+        window.__discordToken = stored.token;
+    } else {
+        delete window.__discordToken;
+    }
     if (stored?.token && stored.expires_at > Date.now()) {
         try {
             const profile = await fetchDiscordProfile(stored.token);
@@ -727,20 +764,36 @@ function renderGalleryTool() {
         reader.onload = () => {
             // Downscale so the photo fits comfortably in localStorage
             const image = new Image();
-            image.onload = () => {
+            image.onload = async () => {
                 const maxSide = 1600;
                 const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
                 const canvas = document.createElement('canvas');
                 canvas.width = Math.round(image.width * scale);
                 canvas.height = Math.round(image.height * scale);
                 canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                const flight = (flightInput.value || '').trim() || 'Crew photo';
+                const stored = getDiscordOauthToken();
+                if (stored) {
+                    try {
+                        const response = await fetch('/api/photos', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${stored}` },
+                            body: JSON.stringify({ dataUrl, flight })
+                        });
+                        const body = await response.json().catch(() => ({}));
+                        if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
+                        sharedGalleryPhotos.unshift(body.photo);
+                        sharedGalleryLoaded = true;
+                        renderGallery();
+                        document.getElementById('gallery-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        return;
+                    } catch (error) {
+                        console.warn('Shared upload failed, keeping the photo local:', error.message);
+                    }
+                }
                 const photos = loadUserGalleryPhotos();
-                photos.unshift({
-                    src: canvas.toDataURL('image/jpeg', 0.85),
-                    flight: (flightInput.value || '').trim() || 'Crew photo',
-                    by: getDiscordUser()?.name || 'Crew',
-                    ts: Date.now()
-                });
+                photos.unshift({ src: dataUrl, flight, by: getDiscordUser()?.name || 'Crew', ts: Date.now() });
                 saveUserGalleryPhotos(photos);
                 renderGallery();
                 document.getElementById('gallery-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -754,6 +807,7 @@ function renderGalleryTool() {
 function initGalleryTool() {
     if (!document.getElementById('gallery-tool')) return;
     renderGallery();
+    loadSharedGalleryPhotos();
 }
 
 
