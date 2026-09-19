@@ -403,6 +403,23 @@ header {
 .last-updated { font-size: .85rem; color: var(--muted); white-space: nowrap; }
 .result-count { min-height: 20px; margin: 16px 0 6px; color: var(--muted); font-size: 13px; }
 
+/* FIDS search pill */
+.search {
+  display: flex; align-items: center; gap: 10px;
+  width: min(460px, 100%); padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--white); box-shadow: 0 3px 12px rgb(28 33 38 / .04);
+  color: var(--muted);
+  transition: border .2s ease, box-shadow .2s ease;
+}
+.search:focus-within { border-color: #aeb4bb; box-shadow: 0 0 0 3px rgb(35 39 43 / .1); }
+.search span { font-size: 25px; line-height: 0; transform: rotate(-20deg); }
+.search input {
+  width: 100%; height: 48px; border: 0; outline: 0;
+  color: var(--ink); font-size: 14px; background: transparent;
+}
+.search input::placeholder { color: #999da3; }
+
 /* FIDS flight card grid (weekly schedule) */
 .date-group { margin-top: 26px; animation: reveal .38s ease both; }
 .date-heading {
@@ -425,7 +442,7 @@ header {
 .flight-card:hover { z-index: 1; transform: translateY(-3px); box-shadow: 0 12px 28px rgb(26 31 36 / .1); }
 .time { display: flex; flex-direction: column; gap: 5px; font-size: 24px; font-weight: 700; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
 .time > time { font-family: "Emirates Medium", Arial, sans-serif; }
-.countdown { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .03em; }
+.countdown { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .03em; white-space: nowrap; }
 .flight-id { display: flex; flex-direction: column; gap: 4px; }
 .flight-number-row { display: flex; align-items: center; gap: 8px; }
 .tail-logo { width: 27px; height: 27px; flex: 0 0 auto; object-fit: contain; }
@@ -612,6 +629,7 @@ header {
   text-align: center; margin-bottom: 1.8rem;
 }
 .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.4rem; }
+.application-process { margin-top: 3.5rem; }
 .benefit { padding: 1.6rem 1.5rem; text-align: center; }
 .benefit i { font-size: 1.9rem; color: var(--ink); margin-bottom: .8rem; }
 .benefit h4 { font-size: 1.02rem; margin-bottom: .4rem; }

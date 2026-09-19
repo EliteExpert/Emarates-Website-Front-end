@@ -240,10 +240,10 @@ function renderFidsBoard(listElement, flights) {
     }, {});
     let index = 0;
     listElement.innerHTML = Object.entries(groups).map(([date, items]) => `
-        <section class="date-group">
+        <div class="date-group">
             <h2 class="date-heading">${displayDateFmt.format(new Date(`${date}T00:00:00Z`))}</h2>
             ${items.map((flight) => flightCardHtml(flight, index++)).join('')}
-        </section>`).join('');
+        </div>`).join('');
 }
 
 function flightsErrorHtml() {
@@ -744,7 +744,6 @@ function renderGalleryTool() {
             <input type="text" id="gallery-flight" placeholder="Flight number (e.g. EK247)" maxlength="24">
             <button type="submit" class="btn primary">Add to Gallery</button>
         </form>
-        <p class="gallery-tool-note">Photos you add are kept in this browser and appear first in the rotation.</p>
     `;
 
     const form = document.getElementById('gallery-form');
