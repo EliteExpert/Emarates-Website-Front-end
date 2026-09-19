@@ -263,7 +263,7 @@ header {
 
 /* CTA band */
 .cta-section {
-  background: linear-gradient(130deg, #23272b 0%, #2e3338 100%);
+  background: linear-gradient(rgba(20, 22, 24, .68), rgba(20, 22, 24, .68)), url('assets/photos/fleet-moon-night.png') center/cover no-repeat;
   color: #fff; text-align: center; padding: 5.5rem 0;
 }
 .cta-section h2 {
@@ -335,7 +335,7 @@ header {
   border-radius: 24px; border: 1px solid #e9eaeb;
   box-shadow: 0 18px 44px rgb(26 31 36 / .12);
   aspect-ratio: 16 / 9; max-height: 72vh;
-  background: linear-gradient(rgba(20, 22, 24, .45), rgba(20, 22, 24, .45)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80') center/cover no-repeat;
+  background: url('assets/photos/fleet-takeoff-day.png') center/cover no-repeat;
 }
 .fleet-video-frame video {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -762,4 +762,196 @@ header {
   .home-title, .home-subtitle, .home-description, .home-buttons, .hero-live,
   .hero-eyebrow, .page-header h1, .page-header p,
   .flight-card, .flight-item, .date-group { animation: none; }
+}
+
+/* ============ Class comparison table fix ============ */
+/* The wrapper div is the card; the inner table fills it. */
+.comparison-table { overflow: hidden; }
+.comparison-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+}
+.comparison-table th, .comparison-table td {
+  padding: .9rem 1.1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--surface);
+  font-size: 14px;
+}
+.comparison-table th {
+  background: var(--surface);
+  font-family: "Emirates Medium", Arial, sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #55595f;
+}
+.comparison-table td:first-child, .comparison-table th:first-child { font-weight: 700; }
+.comparison-table .fa-check { color: #177141; }
+.comparison-table .fa-times { color: var(--muted); }
+.comparison-table tr:last-child td { border-bottom: 0; }
+
+/* ============ Page banners (fleet photography) ============ */
+.page-banner {
+  position: relative;
+  margin-top: 1.6rem;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid #e9eaeb;
+  box-shadow: 0 18px 44px rgb(26 31 36 / .12);
+  aspect-ratio: 21 / 8;
+  max-height: 460px;
+  background-size: cover;
+  background-position: center;
+}
+.page-banner::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(20,22,24,0) 55%, rgba(20,22,24,.55) 100%);
+}
+.page-banner-caption {
+  position: absolute; left: 22px; bottom: 16px; z-index: 2;
+  color: #fff; font-family: "Emirates Medium", Arial, sans-serif;
+  font-size: clamp(16px, 2.4vw, 26px); font-weight: 600; letter-spacing: -.02em;
+  text-shadow: 0 2px 14px rgb(0 0 0 / .5);
+}
+
+/* ============ Airline filter tabs (weekly board) ============ */
+.airline-tabs {
+  display: flex; gap: 5px; width: fit-content; max-width: 100%;
+  padding: 5px; border-radius: 14px; background: #e9ebed;
+  margin: 1.4rem 0 0;
+  overflow-x: auto;
+}
+.airline-tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: 10px;
+  color: #676b71; font-size: 14px; font-weight: 700;
+  text-decoration: none; cursor: pointer; border: 0; background: none;
+  white-space: nowrap;
+  transition: background .22s ease, color .22s ease, box-shadow .22s ease;
+}
+.airline-tab img { width: 20px; height: 20px; object-fit: contain; }
+.airline-tab:hover { color: var(--ink); }
+.airline-tab.is-active { background: var(--white); color: var(--ink); box-shadow: 0 2px 9px rgb(20 25 30 / .12); }
+
+/* ============ Stats band with fleet photo ============ */
+.stats-section {
+  position: relative;
+  background: linear-gradient(rgba(20, 22, 24, .72), rgba(20, 22, 24, .72)), url('assets/photos/fleet-tokyo-airport.png') center/cover no-repeat;
+  color: #fff;
+}
+.stats-section .stat-number, .stats-section .stat-card .stat-number { color: #fff; }
+.stats-section .stat-label { color: #b9bcc1; }
+.stats-section .stat-card { background: rgb(255 255 255 / .06); border: 1px solid rgb(255 255 255 / .14); box-shadow: none; }
+
+/* ============ Dark mode ============ */
+[data-theme="dark"] {
+  --ink: #e8eaed;
+  --muted: #9aa0a6;
+  --surface: #232629;
+  --line: #2e3236;
+  --white: #1f2225;
+  --card-line: #2e3236;
+}
+[data-theme="dark"] body,
+html[data-theme="dark"] body {
+  background: linear-gradient(130deg, #17191b 0%, #1b1e21 48%, #141618 100%);
+  color: var(--ink);
+}
+[data-theme="dark"] header {
+  background: rgba(23, 25, 27, .88);
+  border-bottom-color: var(--line);
+}
+[data-theme="dark"] .bar { background: var(--ink); }
+[data-theme="dark"] .nav-menu { background: #232629; }
+[data-theme="dark"] .nav-link { color: #9aa0a6; }
+[data-theme="dark"] .nav-link:hover, [data-theme="dark"] .nav-link.active { color: var(--ink); }
+[data-theme="dark"] .nav-link.active { background: #2c3034; }
+[data-theme="dark"] .logout-btn { color: var(--muted); border-color: var(--line); }
+[data-theme="dark"] .page-header .container { border-bottom-color: var(--line); }
+[data-theme="dark"] .page-header p, [data-theme="dark"] .eyebrow, [data-theme="dark"] .hero-eyebrow { color: var(--muted); }
+[data-theme="dark"] .flip-separator { color: var(--ink); }
+[data-theme="dark"] .btn.secondary { background: var(--white); color: var(--ink); border-color: var(--line); }
+[data-theme="dark"] .btn.secondary:hover { border-color: #4a5056; }
+[data-theme="dark"] .btn.outline { color: var(--ink); border-color: #4a5056; }
+[data-theme="dark"] .btn.outline:hover { background: var(--white); border-color: #6b7178; }
+[data-theme="dark"] .home-section .btn.secondary { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
+[data-theme="dark"] .home-section .btn.secondary:hover { background: rgba(255,255,255,.22); }
+[data-theme="dark"] .home-section { background: none; }
+[data-theme="dark"] .home-description { color: #c9ccd1; }
+[data-theme="dark"] .home-subtitle { color: var(--primary); }
+[data-theme="dark"] .hero-pill { background: rgb(255 255 255 / .06); border-color: rgb(255 255 255 / .16); }
+[data-theme="dark"] .hero-pill strong { color: #fff; }
+[data-theme="dark"] .section-title, [data-theme="dark"] .stat-number { color: var(--ink); }
+[data-theme="dark"] .section-subtitle, [data-theme="dark"] .feature-card p,
+[data-theme="dark"] .class-card > p, [data-theme="dark"] .career-card > p,
+[data-theme="dark"] .event-details p, [data-theme="dark"] .benefit p,
+[data-theme="dark"] .step p, [data-theme="dark"] .join-card > p { color: var(--muted); }
+[data-theme="dark"] .feature-card, [data-theme="dark"] .class-card, [data-theme="dark"] .career-card,
+[data-theme="dark"] .event-card, [data-theme="dark"] .benefit, [data-theme="dark"] .join-card,
+[data-theme="dark"] .stat-card, [data-theme="dark"] .step, [data-theme="dark"] .status-container,
+[data-theme="dark"] .status-search, [data-theme="dark"] .flights-empty,
+[data-theme="dark"] .login-prompt-content, [data-theme="dark"] .community-stats {
+  background: var(--white);
+  border-color: var(--card-line);
+}
+[data-theme="dark"] .community-stats .stat { border-color: var(--surface); }
+[data-theme="dark"] .search, [data-theme="dark"] .search-form input { background: var(--white); border-color: var(--line); color: var(--ink); }
+[data-theme="dark"] .status-header, [data-theme="dark"] .flight-meta, [data-theme="dark"] .flight-booking-details,
+[data-theme="dark"] .flight-booking-actions, [data-theme="dark"] .join-requirements,
+[data-theme="dark"] .modal-header { border-color: var(--line); }
+[data-theme="dark"] .flight-card, [data-theme="dark"] .flight-item, [data-theme="dark"] .flight-booking-card {
+  background: var(--white); border-color: var(--card-line);
+}
+[data-theme="dark"] .flight-number, [data-theme="dark"] .cell-value, [data-theme="dark"] .meta-value,
+[data-theme="dark"] .detail-group span, [data-theme="dark"] .time { color: var(--ink); }
+[data-theme="dark"] .countdown, [data-theme="dark"] .progress-text, [data-theme="dark"] .airline,
+[data-theme="dark"] .last-updated, [data-theme="dark"] .week-range, [data-theme="dark"] .result-count,
+[data-theme="dark"] .meta-label, [data-theme="dark"] .meta-item .meta-label,
+[data-theme="dark"] .detail-group label, [data-theme="dark"] .date-heading { color: var(--muted); }
+[data-theme="dark"] .progress-bar { background: #2e3236; }
+[data-theme="dark"] .empty-state, [data-theme="dark"] .flights-loading { border-color: #3a3f44; color: var(--muted); }
+[data-theme="dark"] .discord-integration { border-color: #3a3f44; color: var(--muted); }
+[data-theme="dark"] .event-chip { color: #8b94f7; border-color: #8b94f7; }
+[data-theme="dark"] .event-chip:hover { background: var(--discord); color: #fff; }
+[data-theme="dark"] .marquee-section { background: var(--white); border-color: var(--line); }
+[data-theme="dark"] .marquee-item { color: var(--muted); }
+[data-theme="dark"] .marquee-item strong { color: var(--ink); }
+[data-theme="dark"] .footer { background: var(--white); border-top-color: var(--line); }
+[data-theme="dark"] .footer-masthead { border-bottom-color: var(--line); }
+[data-theme="dark"] .footer-section li, [data-theme="dark"] .footer-section a { color: var(--muted); }
+[data-theme="dark"] .footer-section a:hover { color: var(--ink); }
+[data-theme="dark"] .footer-bottom { border-top-color: var(--surface); color: #6b7178; }
+[data-theme="dark"] .social-links a { border-color: var(--line); color: var(--muted); }
+[data-theme="dark"] .modal { background: rgb(0 0 0 / .6); }
+[data-theme="dark"] .modal-content { background: var(--white); }
+[data-theme="dark"] .comparison-table table { background: var(--white); }
+[data-theme="dark"] .comparison-table th { background: var(--surface); color: var(--muted); }
+[data-theme="dark"] .comparison-table th, [data-theme="dark"] .comparison-table td { border-bottom-color: var(--surface); }
+[data-theme="dark"] .page-banner { border-color: var(--card-line); }
+[data-theme="dark"] .airline-tabs { background: #232629; }
+[data-theme="dark"] .airline-tab { color: #9aa0a6; }
+[data-theme="dark"] .airline-tab:hover, [data-theme="dark"] .airline-tab.is-active { color: var(--ink); }
+[data-theme="dark"] .airline-tab.is-active { background: #2c3034; }
+[data-theme="dark"] .cta-section { background: linear-gradient(130deg, #101214 0%, #1a1d20 100%); }
+[data-theme="dark"] .stats-section {
+  background: linear-gradient(rgba(12, 13, 15, .78), rgba(12, 13, 15, .78)), url('assets/photos/fleet-tokyo-airport.png') center/cover no-repeat;
+}
+[data-theme="dark"] .scroll-cue { color: #fff; }
+
+/* Theme toggle button */
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; padding: 0;
+  border-radius: 10px; border: 1px solid var(--line);
+  background: var(--white); color: var(--ink);
+  font-size: .95rem; cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.theme-toggle:hover { border-color: #aeb4bb; transform: translateY(-1px); }
+
+@media (max-width: 768px) {
+  .page-banner { aspect-ratio: 16 / 9; border-radius: 16px; }
 }

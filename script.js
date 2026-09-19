@@ -51,6 +51,7 @@ async function initAll() {
     initFooterYear();
     initMarquee();
     initFlipClock();
+    initThemeToggle();
     initPageFeatures();
 
     // Set active navigation link
@@ -155,13 +156,13 @@ function fidsStatusClass(status) {
     return `status-${String(status || '').toLowerCase().replace(/\s+/g, '-')}`;
 }
 
-async function fetchWeeklyFlights() {
+async function fetchWeeklyFlights(weekOffset = 0) {
     const response = await fetch(`${FIDS_URL}/api/flights`);
     if (!response.ok) throw new Error(`Flight service returned HTTP ${response.status}.`);
     const flights = await response.json();
     if (!Array.isArray(flights)) throw new Error('Flight service returned an invalid schedule.');
 
-    const weekStart = gmtWeekStart();
+    const weekStart = addUtcDays(gmtWeekStart(), 7 * weekOffset);
     const weekEnd = addUtcDays(weekStart, 6);
     const startKey = weekStart.toISOString().slice(0, 10);
     const endKey = weekEnd.toISOString().slice(0, 10);
@@ -250,12 +251,22 @@ async function initWeeklyFlightsPage() {
 
     const searchInput = document.getElementById('flight-search');
     const resultCount = document.getElementById('result-count');
+    const airlineTabs = document.getElementById('airline-tabs');
 
     let allFlights = [];
+    let activeAirline = 'all';
+
+    // The board lists every airline; the tabs and search only narrow it down.
+    const matchesAirline = (flight) => {
+        if (activeAirline === 'all') return true;
+        const code = String(flight.flightNumber || '').trim().toUpperCase().match(/^([A-Z]{2})/)?.[1] || 'other';
+        return activeAirline === 'other' ? !['EK', 'FZ'].includes(code) : code === activeAirline;
+    };
+
     const applyFilter = () => {
         if (!allFlights.length && !list.querySelector('.flight-card')) return;
         const query = (searchInput?.value || '').trim().toLowerCase();
-        const visible = allFlights.filter((flight) =>
+        const visible = allFlights.filter((flight) => matchesAirline(flight) &&
             [flight.flightNumber, flight.destination, flight.aircraft, flight.status]
                 .some((value) => String(value || '').toLowerCase().includes(query)));
         if (resultCount) resultCount.textContent = `${visible.length} ${visible.length === 1 ? 'flight' : 'flights'} shown`;
@@ -266,11 +277,29 @@ async function initWeeklyFlightsPage() {
         }
     };
     if (searchInput) searchInput.addEventListener('input', applyFilter);
+    if (airlineTabs) airlineTabs.addEventListener('click', (event) => {
+        const tab = event.target.closest('.airline-tab');
+        if (!tab) return;
+        activeAirline = tab.dataset.airline;
+        airlineTabs.querySelectorAll('.airline-tab').forEach((button) => button.classList.toggle('is-active', button === tab));
+        applyFilter();
+    });
 
     const load = async () => {
         try {
             allFlights = await fetchWeeklyFlights();
-            if (resultCount) resultCount.textContent = `${allFlights.length} ${allFlights.length === 1 ? 'flight' : 'flights'} shown`;
+            let weekLabel = '';
+            if (!allFlights.length) {
+                // Late in the week the schedule is often already published for
+                // next week; show that instead of an empty board.
+                const nextWeek = await fetchWeeklyFlights(1);
+                if (nextWeek.length) {
+                    allFlights = nextWeek;
+                    const fmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
+                    weekLabel = `Next week (${fmt.format(addUtcDays(gmtWeekStart(), 7))} – ${fmt.format(addUtcDays(gmtWeekStart(), 13))} GMT) · `;
+                }
+            }
+            if (resultCount) resultCount.textContent = `${weekLabel}${allFlights.length} ${allFlights.length === 1 ? 'flight' : 'flights'} shown`;
             renderFidsBoard(list, allFlights);
             const updateTimeElement = document.getElementById('update-time');
             if (updateTimeElement) updateTimeElement.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -289,10 +318,14 @@ async function initHomePreview() {
     const container = document.getElementById('home-flights-preview');
     if (!container) return;
 
-    const render = (flights) => {
+    const render = async (flights) => {
+        let source = flights;
+        if (!flights.filter((flight) => flight.scheduledTs > Date.now()).length) {
+            try { source = await fetchWeeklyFlights(1); } catch { source = flights; }
+        }
         const heroFlightCount = document.getElementById('hero-flight-count');
-        if (heroFlightCount) heroFlightCount.textContent = flights.length.toLocaleString();
-        const upcoming = flights.filter((flight) => flight.scheduledTs > Date.now()).slice(0, 4);
+        if (heroFlightCount) heroFlightCount.textContent = source.length.toLocaleString();
+        const upcoming = source.filter((flight) => flight.scheduledTs > Date.now()).slice(0, 4);
         if (!upcoming.length) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -305,13 +338,13 @@ async function initHomePreview() {
     };
 
     try {
-        render(await fetchWeeklyFlights());
+        await render(await fetchWeeklyFlights());
     } catch (error) {
         console.error('Home flight preview failed:', error);
         container.innerHTML = flightsErrorHtml();
     }
     setInterval(async () => {
-        try { render(await fetchWeeklyFlights()); } catch (error) { console.warn('Home flight preview refresh failed:', error); }
+        try { await render(await fetchWeeklyFlights()); } catch (error) { console.warn('Home flight preview refresh failed:', error); }
     }, 5 * 60 * 1000);
 }
 
@@ -469,6 +502,23 @@ function initCounters() {
 function initFooterYear() {
     const yearElement = document.getElementById('footer-year');
     if (yearElement) yearElement.textContent = new Date().getFullYear();
+}
+
+// Theme toggle (works with the late-loaded header via delegation)
+function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('theme', theme);
+    const icon = document.querySelector('#theme-toggle i');
+    if (icon) icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+function initThemeToggle() {
+    const current = document.documentElement.dataset.theme || 'light';
+    applyTheme(current);
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('#theme-toggle')) return;
+        applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    });
 }
 
 // Duplicate the marquee content so the CSS -50% loop scrolls seamlessly
