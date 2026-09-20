@@ -1343,7 +1343,7 @@ body.ife-page header { background: var(--white); }
   color: #74777d; white-space: nowrap;
 }
 /* Dining menu (Communication tab) */
-.ice-menu { display: grid; gap: .9rem; justify-items: center; }
+.ice-menu { display: grid; gap: .9rem; justify-items: start; padding-left: .6em; }
 .ice-menu .ice-course {
   width: 100%; max-width: 420px;
   border: 1px solid #e2e4e7; border-radius: .8em;
@@ -1355,4 +1355,4 @@ body.ife-page header { background: var(--white); }
 }
 .ice-course ul { list-style: none; margin: 0; padding: 0; }
 .ice-course li { padding: .28rem 0 .28rem 1rem; position: relative; font-size: .88rem; }
-.ice-course li::before { content: "2"; position: absolute; left: 0; color: var(--primary); }
+.ice-course li::before { content: "•"; position: absolute; left: 0; color: var(--primary); }
