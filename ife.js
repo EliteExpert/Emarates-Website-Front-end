@@ -35,6 +35,43 @@ const IFE_DEFAULT_QUIZ = [
     { q: 'Who welcomes you aboard with "Ahlan wa Sahlan"?', options: ['The captain only', 'The cabin crew', 'Ground staff'], answer: 1 }
 ];
 
+const IFE_MENUS = {
+    Economy: {
+        label: 'Economy class Dining',
+        courses: [
+            { name: 'Starters', items: ['Garden Salad with Vinaigrette', 'Lentil Soup'] },
+            { name: 'Main Course', items: ['Butter Chicken with Basmari Rice', 'Vegetable Lasagna', 'Grilled Chicken with Mashed Potatoes'] },
+            { name: 'Desserts', items: ['Chocolate Brownie', 'Fruit Cup', 'Mini Cheesecake'] },
+            { name: 'Beverages', items: ['Water, Soft Drinks, Juices', 'Tea & Coffee'] }
+        ]
+    },
+    Business: {
+        label: 'Business class Dining',
+        courses: [
+            { name: 'Starters', items: ['Mediterranean Mezze Platter', 'Caesar Salad with Grilled Chicken', 'Lentil & Carrot Soup'] },
+            { name: 'Main Course', items: ['Truffle Mushroom Pasta', 'Chicken Biryani with Raita', 'Pan-seared Salmon with Lemon Butter Sauce'] },
+            { name: 'Desserts', items: ['Tiramisu', 'Pistachio Mousse', 'Chocolate Éclair'] },
+            { name: 'Beverages', items: ['Soft Drinks, Fruit Juices', 'Mocktails & Iced Coffee', 'Selection of Teas & Coffees'] }
+        ]
+    },
+    First: {
+        label: 'First class Dining',
+        courses: [
+            { name: 'Starters', items: ['Caviar with Blinis & Crème Fraîche', 'Smoked Salmon Platter with Capers', 'Truffle-infused Mushroom Soup'] },
+            { name: 'Main Course', items: ['Wagyu Beef Tenderloin with Red Wine Jus', 'Lobster Thermidor', 'Grilled Vegetable Wellington'] },
+            { name: 'Desserts', items: ['Belgian Chocolate Soufflé', 'Classic Crème Brûlée', 'Fruit Tart with Vanilla Cream'] },
+            { name: 'Beverages', items: ['Vintage Wines & Champagne', 'Arabic Coffee & Specialty Teas', 'Freshly Squeezed Juices & Signature Mocktails'] }
+        ]
+    },
+    Charter: {
+        label: 'Private Charter',
+        courses: [
+            { name: 'On demand', items: ['Bespoke menu designed with the crew before departure', 'Any course, any time — the cabin is yours'] },
+            { name: 'Cellar', items: ['Champagne, rare wines and tailored mocktails'] }
+        ]
+    }
+};
+
 const IFE_CONTACTS = [
     { icon: 'fab fa-discord', name: 'Emirates PTFS Server', detail: 'News, events and support', href: 'https://discord.gg/PJVAvbJbdn' },
     { icon: 'fas fa-robot', name: 'Applications Bot', detail: 'Careers and cabin applications', href: 'https://discord.gg/PJVAvbJbdn' },
@@ -73,6 +110,21 @@ function ifeNextFlight() {
         .sort((a, b) => a.flight.scheduledTs - b.flight.scheduledTs)[0] || null;
 }
 
+// For arrivals the filed airport is the origin and the destination is
+// always Dubai; departures are the mirror image.
+function ifeRouteEndpoints(flight) {
+    const city = ifeDestinationCity(flight);
+    return flight.type === 'departure'
+        ? { from: 'Dubai', to: city }
+        : { from: city, to: 'Dubai' };
+}
+
+function ifePtfsEndpoints(flight) {
+    return flight.type === 'departure'
+        ? { from: 'Dubai', to: String(flight.ptfsArrival || 'PTFS') }
+        : { from: String(flight.ptfsDeparture || 'PTFS'), to: 'Dubai' };
+}
+
 function ifeDestinationCity(flight) {
     // "Dubai to Sydney" — strip any (XXX) code and take the city part
     return String(flight.destination || '')
@@ -95,6 +147,14 @@ async function ifeFetchMemberRoles() {
     } catch {
         return null;
     }
+}
+
+function ifeClassForRoles(roles) {
+    const has = (list) => (list || []).some((id) => roles?.includes(id));
+    if (has(IFE_CONFIG.firstClassRoleIds)) return 'First';
+    if (has(IFE_CONFIG.charterRoleIds)) return 'Charter';
+    if (has(IFE_CONFIG.businessClassRoleIds)) return 'Business';
+    return 'Economy';
 }
 
 function ifeIsQuizAdmin(roles) {
@@ -121,7 +181,6 @@ async function ifeLoadQuiz() {
 
 function iceShell() {
     ifeRoot.innerHTML = `
-        <p class="ife-seat-label">Seat ${IFE_CONFIG.seat}A · Emarates ICE</p>
         <div class="ife-seat-base">
             <img class="ife-photo" src="assets/photos/seat-back-base.png" alt="Your Emirates seat back with the Emarates ICE screen">
             <div class="ife-screen-overlay">
@@ -142,9 +201,7 @@ function iceShell() {
 function iceTopbarUpdate(flight) {
     const element = document.getElementById('ice-topbar-flight');
     if (!element || !flight) return;
-    const isDeparture = flight.type === 'departure';
-    const from = isDeparture ? 'Dubai' : ifeDestinationCity(flight);
-    const to = isDeparture ? ifeDestinationCity(flight) : 'Dubai';
+    const { from, to } = ifeRouteEndpoints(flight);
     element.innerHTML = `<strong>${ifeEscape(flight.flightNumber)}</strong> ${ifeEscape(from)} to ${ifeEscape(to)}`;
 }
 
@@ -172,10 +229,10 @@ function iceWelcomeView(active, user) {
         sideBox = `
             <div class="ice-side-info">
                 <h4><i class="fas fa-route"></i> Now flying</h4>
-                <p class="ice-side-route">${ifeEscape(flight.ptfsDeparture || 'PTFS')} <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(flight.ptfsArrival || 'PTFS')}</p>
+                <p class="ice-side-route">${ifeEscape(ifePtfsEndpoints(flight).from)} <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(ifePtfsEndpoints(flight).to)}</p>
                 <div class="ice-minimap" id="ice-minimap" title="Click to enlarge the map">${iceMapSvg(flight, active.state, true)}</div>
                 <ul>
-                    <li><span>Real route</span><strong>Dubai <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(ifeDestinationCity(flight))}</strong></li>
+                    <li><span>Real route</span><strong>${ifeEscape(ifeRouteEndpoints(flight).from)} <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(ifeRouteEndpoints(flight).to)}</strong></li>
                     <li><span>Duration</span><strong>1hr</strong></li>
                 </ul>
             </div>`;
@@ -214,9 +271,6 @@ function iceMapSvg(flight, state, mini = false) {
     if (!from || !to) {
         return `<div class="ice-map-missing">PTFS route not filed for this flight.</div>`;
     }
-    const progress = Math.min(0.98, Math.max(0.02, state?.progress ?? 0));
-    const px = from.x + (to.x - from.x) * progress;
-    const py = from.y + (to.y - from.y) * progress;
     // The map box is 1177x657, so vertical percentages are relative to a
     // different scale than horizontal ones — convert before the trig.
     const MAP_AR = 1177 / 657;
@@ -230,7 +284,6 @@ function iceMapSvg(flight, state, mini = false) {
                 <span class="ice-map-dot" style="left:${from.x}%;top:${from.y}%"></span>
                 <span class="ice-map-dot" style="left:${to.x}%;top:${to.y}%"></span>
                 <span class="ice-map-line" style="left:${from.x}%;top:${from.y}%;width:${lineLength.toFixed(2)}%;transform:rotate(${lineAngle}rad);transform-origin:0 0"></span>
-                ${state?.state === 'airborne' ? `<i class="fas fa-plane ice-map-plane" style="left:${px}%;top:${py}%;transform:translate(-50%,-50%) rotate(${lineAngle * 180 / Math.PI + 90}deg)"></i>` : ''}
             </div>
         </div>
     `;
@@ -245,20 +298,33 @@ function iceInfoPanel(flight, state) {
             <h4><i class="fas fa-plane"></i> Flight information</h4>
             <ul class="ice-info-list">
                 <li><span>Flight</span><strong>${ifeEscape(flight.flightNumber)}</strong></li>
-                <li><span>Route</span><strong>${isDeparture ? 'Dubai' : ifeEscape(ifeDestinationCity(flight))} to ${isDeparture ? ifeEscape(ifeDestinationCity(flight)) : 'Dubai'}</strong></li>
-                <li><span>PTFS route</span><strong>${ifeEscape(flight.ptfsDeparture || '—')} to ${ifeEscape(flight.ptfsArrival || '—')}</strong></li>
+                <li><span>Route</span><strong>${ifeEscape(ifeRouteEndpoints(flight).from)} to ${ifeEscape(ifeRouteEndpoints(flight).to)}</strong></li>
+                <li><span>PTFS route</span><strong>${ifeEscape(ifePtfsEndpoints(flight).from)} to ${ifeEscape(ifePtfsEndpoints(flight).to)}</strong></li>
                 <li><span>Duration</span><strong>1hr</strong></li>
                 <li><span>Aircraft</span><strong>${ifeEscape(flight.aircraft || 'A380-800')}</strong></li>
                 <li><span>Terminal</span><strong>${ifeEscape(flight.terminal || 'T3')}</strong></li>
             </ul>
             <div class="ice-map-large" id="ice-map-large">${iceMapSvg(flight, state, false)}</div>
-            <p class="ice-map-hint">Live map of the PTFS route — the aircraft marker follows the flight.</p>
+            <p class="ice-map-hint">Map of the PTFS route.</p>
         </div>
     `;
 }
 
-function iceCommsPanel() {
+async function iceCommsPanel(flight) {
+    const roles = await ifeFetchMemberRoles();
+    const cabin = ifeClassForRoles(roles);
+    const menu = IFE_MENUS[cabin];
     return `
+        <div class="ice-panel">
+            <h4><i class="fas fa-utensils"></i> ${ifeEscape(menu.label)}</h4>
+            <div class="ice-menu">
+                ${menu.courses.map((course) => `
+                    <div class="ice-course">
+                        <h4>${ifeEscape(course.name)}</h4>
+                        <ul>${course.items.map((item) => `<li>${ifeEscape(item)}</li>`).join('')}</ul>
+                    </div>`).join('')}
+            </div>
+        </div>
         <div class="ice-panel">
             <h4><i class="fas fa-satellite-dish"></i> Communication</h4>
             <div class="ice-contacts">
@@ -409,7 +475,7 @@ async function iceRenderSection(section, active, user) {
                 <button class="ice-mini-btn" type="button" data-ice="home"><i class="fas fa-arrow-left"></i> Welcome</button>
                 <h3>Communication</h3>
             </div>
-            ${iceCommsPanel()}`;
+            ${await iceCommsPanel(flight)}`;
     } else {
         body.innerHTML = `
             <div class="ice-section-head">
@@ -459,23 +525,6 @@ async function initIfe() {
 
     if (active) iceTopbarUpdate(active.flight);
     await iceRenderSection('home', active, user);
-
-    if (active) {
-        // Keep the aircraft marker moving on the PTFS map while aboard
-        setInterval(() => {
-            const state = ifeFlightState(active.flight);
-            if (state.state !== 'airborne') return;
-            const from = PTFS_AIRPORTS[String(active.flight.ptfsDeparture || '').trim()];
-            const to = PTFS_AIRPORTS[String(active.flight.ptfsArrival || '').trim()];
-            if (!from || !to) return;
-            const px = from.x + (to.x - from.x) * state.progress;
-            const py = from.y + (to.y - from.y) * state.progress;
-            document.querySelectorAll('.ice-map-plane').forEach((plane) => {
-                plane.style.left = `${px}%`;
-                plane.style.top = `${py}%`;
-            });
-        }, 30 * 1000);
-    }
 }
 
 initIfe();

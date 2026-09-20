@@ -1110,11 +1110,6 @@ body.ife-page header { background: var(--white); }
   border-radius: 18px;
   box-shadow: 0 24px 60px rgb(0 0 0 / .35);
 }
-.ife-seat-label {
-  margin: 0 0 .5rem; color: #55595f;
-  font-family: "Emirates Medium", Arial, sans-serif;
-  font-weight: 700; font-size: .95rem; letter-spacing: .02em;
-}
 .ife-screen-overlay {
   position: absolute;
   left: 18.5%; top: 19.35%; width: 64.01%; height: 47.62%;
