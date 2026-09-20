@@ -121,13 +121,13 @@ async function ifeLoadQuiz() {
 
 function iceShell() {
     ifeRoot.innerHTML = `
+        <p class="ife-seat-label">Seat ${IFE_CONFIG.seat}A · Emarates ICE</p>
         <div class="ife-seat-base">
             <img class="ife-photo" src="assets/photos/seat-back-base.png" alt="Your Emirates seat back with the Emarates ICE screen">
             <div class="ife-screen-overlay">
                 <header class="ice-topbar">
                     <span class="ice-logo-red">Emarates</span>
                     <span class="ice-topbar-route">
-                        <strong>${IFE_CONFIG.seat}A</strong>
                         <span id="ice-topbar-flight">Emarates ICE</span>
                     </span>
                     <span class="ice-topbar-duration"><i class="fas fa-clock"></i> 1hr flight</span>
@@ -177,7 +177,6 @@ function iceWelcomeView(active, user) {
                 <ul>
                     <li><span>Real route</span><strong>Dubai <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(ifeDestinationCity(flight))}</strong></li>
                     <li><span>Duration</span><strong>1hr</strong></li>
-                    <li><span>Status</span><strong>${ifeEscape(flight.status)}</strong></li>
                 </ul>
             </div>`;
     }
@@ -218,13 +217,20 @@ function iceMapSvg(flight, state, mini = false) {
     const progress = Math.min(0.98, Math.max(0.02, state?.progress ?? 0));
     const px = from.x + (to.x - from.x) * progress;
     const py = from.y + (to.y - from.y) * progress;
+    // The map box is 1177x657, so vertical percentages are relative to a
+    // different scale than horizontal ones — convert before the trig.
+    const MAP_AR = 1177 / 657;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const lineLength = Math.hypot(dx, dy / MAP_AR);
+    const lineAngle = Math.atan2(dy / MAP_AR, dx);
     return `
         <div class="ice-map${mini ? ' ice-map-mini' : ''}"${mini ? ' data-ice-map-mini' : ''}>
             <div class="ice-map-img" style="background-image:url('assets/photos/ptfs-map.png')">
-                <span class="ice-map-dot" style="left:${from.x}%;top:${from.y}%"></span><em class="ice-map-label" style="left:${from.x}%;top:${from.y}%">${ifeEscape(fromName)}</em>
-                <span class="ice-map-dot" style="left:${to.x}%;top:${to.y}%"></span><em class="ice-map-label" style="left:${to.x}%;top:${to.y}%">${ifeEscape(toName)}</em>
-                <span class="ice-map-line" style="left:${from.x}%;top:${from.y}%;width:${Math.hypot(to.x - from.x, to.y - from.y)}%;transform:rotate(${Math.atan2(to.y - from.y, to.x - from.x)}rad);transform-origin:0 0"></span>
-                ${state?.state === 'airborne' ? `<i class="fas fa-plane ice-map-plane" style="left:${px}%;top:${py}%;transform:translate(-50%,-50%) rotate(${Math.atan2(to.y - from.y, to.x - from.x) * 180 / Math.PI + 90}deg)"></i>` : ''}
+                <span class="ice-map-dot" style="left:${from.x}%;top:${from.y}%"></span>
+                <span class="ice-map-dot" style="left:${to.x}%;top:${to.y}%"></span>
+                <span class="ice-map-line" style="left:${from.x}%;top:${from.y}%;width:${lineLength.toFixed(2)}%;transform:rotate(${lineAngle}rad);transform-origin:0 0"></span>
+                ${state?.state === 'airborne' ? `<i class="fas fa-plane ice-map-plane" style="left:${px}%;top:${py}%;transform:translate(-50%,-50%) rotate(${lineAngle * 180 / Math.PI + 90}deg)"></i>` : ''}
             </div>
         </div>
     `;
@@ -244,7 +250,6 @@ function iceInfoPanel(flight, state) {
                 <li><span>Duration</span><strong>1hr</strong></li>
                 <li><span>Aircraft</span><strong>${ifeEscape(flight.aircraft || 'A380-800')}</strong></li>
                 <li><span>Terminal</span><strong>${ifeEscape(flight.terminal || 'T3')}</strong></li>
-                <li><span>Status</span><strong>${ifeEscape(flight.status)}</strong></li>
             </ul>
             <div class="ice-map-large" id="ice-map-large">${iceMapSvg(flight, state, false)}</div>
             <p class="ice-map-hint">Live map of the PTFS route — the aircraft marker follows the flight.</p>
