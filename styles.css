@@ -1109,7 +1109,7 @@ html[data-theme="dark"] body {
 .ife-screen-overlay {
   /* Percentages of the photo itself, so the screen maps 1:1 at any size */
   position: absolute;
-  left: 18.4%; top: 13.6%; width: 67.6%; height: 83%;
+  left: 18.5%; top: 19.35%; width: 64.01%; height: 47.62%;
   background: #0d0e12;
   overflow: hidden;
   display: flex; flex-direction: column;
