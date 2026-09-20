@@ -218,7 +218,7 @@ function flightCardHtml(flight, index) {
                 <div class="flight-number-row">${tailHtml}<span class="flight-number">${escapeHtml(flight.flightNumber)}</span></div>
                 <span class="airline">${escapeHtml(flight.airline || 'Emirates PTFS')}</span>
             </div>
-            <div class="cell destination-cell"><span class="cell-label">${isDeparture ? 'Destination' : 'Origin'}</span><span class="cell-value">${escapeHtml(flight.destination)}${eventUrl}</span></div>
+            <div class="cell destination-cell"><span class="cell-label">${isDeparture ? 'Destination' : 'Origin'}</span><span class="cell-value">${escapeHtml(flight.destination)}${eventUrl}</span>${flight.ptfsDeparture ? `<span class="cell-ptfs">PTFS: ${escapeHtml(flight.ptfsDeparture)} → ${escapeHtml(flight.ptfsArrival)}</span>` : ''}</div>
             <div class="cell aircraft-cell"><span class="cell-label">Aircraft</span><span class="cell-value">${escapeHtml(flight.aircraft || 'TBD')}</span></div>
             <div class="cell terminal-cell"><span class="cell-label">Terminal</span><span class="terminal">${escapeHtml(flight.terminal || 'TBD')}</span></div>
             <span class="status ${fidsStatusClass(flight.status)}">${escapeHtml(flight.status)}</span>

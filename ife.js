@@ -1,17 +1,16 @@
-// ife.js — Emarates IFE: in-flight entertainment for Emirates PTFS.
-// Unlocks only while an FIDS flight is in the air, requires Discord login,
-// and looks for First/Business cabin roles before loading class menus.
+// ife.js — Emarates iCe: the seat-back screen. Dark cinematic layout with
+// the ice tile wall, flight strip, and class-aware dining. Unlocked only
+// while an FIDS flight is airborne; Discord login + cabin roles required.
 
 const IFE_CONFIG = {
     // Discord role IDs that unlock the premium class menus.
     // Right-click the role in Discord → Copy ID, then paste it here.
     firstClassRoleIds: [],      // e.g. ['1331853227720708146']
     businessClassRoleIds: [],   // e.g. ['1331852990629417020']
-    charterRoleIds: [],         // Private Charter role, e.g. ['1240235507000000000']
+    charterRoleIds: [],         // Private Charter role
     cruiseSpeedKmh: 902
 };
 
-// Dubai plus destinations our crews fly to (haversine distance for the real route panel)
 const AIRPORT_COORDS = {
     DXB: [25.2532, 55.3657], DWC: [24.8968, 55.1614], LHR: [51.4700, -0.4543],
     LGW: [51.1537, -0.1821], JFK: [40.6413, -73.7781], EWR: [40.6895, -74.1745],
@@ -67,23 +66,25 @@ const IFE_MENUS = {
     Charter: {
         label: 'Private Charter',
         courses: [
-            { name: 'On demand', items: ['Full bespoke menu designed with the crew before departure', 'Any course, any time — the cabin is yours'] },
+            { name: 'On demand', items: ['Bespoke menu designed with the crew before departure', 'Any course, any time — the cabin is yours'] },
             { name: 'Cellar', items: ['Champagne, rare wines and tailored mocktails'] }
         ]
     }
 };
 
-const IFE_ENTERTAINMENT = [
-    { icon: 'fa-film', title: 'Movies', items: ['Skyward: The Journey', 'Queen of the Skies — A380 Documentary', 'Desert Horizon', 'The ATC Files', 'Wings Over Seven Seas', 'Midnight at Terminal 3'] },
-    { icon: 'fa-tv', title: 'TV', items: ['PTFS Flight Diaries', 'Air Crash Investigations Marathon', 'The Cabin Crew Show', 'World Airports S7'] },
-    { icon: 'fa-music', title: 'Music', items: ['Emirates Ambient', 'Desert Lounge', 'Classic Departures', 'Arabic Gold', 'Top of the Clouds'] },
-    { icon: 'fa-gamepad', title: 'Games', items: ['Sky Chess', 'Trivia: Aviation Edition', 'Sudoku', 'Flight Trainer', 'Landing Challenge'] },
-    { icon: 'fa-child', title: 'Kids', items: ['Sky Pals Adventures', 'Colouring the Fleets', 'Junior Pilot School'] }
+const IFE_TILES = [
+    { icon: 'fa-clapperboard', title: 'Movies', blurb: 'Latest premieres', art: 'linear-gradient(135deg,#8f1d22,#d71921)', items: ['Skyward: The Journey', 'Queen of the Skies', 'Desert Horizon', 'The ATC Files', 'Wings Over Seven Seas', 'Midnight at Terminal 3', 'Golden Hour', 'Fleet of Fortunes'] },
+    { icon: 'fa-book-quran', title: 'Quran', blurb: 'Recitations on board', art: 'linear-gradient(135deg,#04543f,#0e8f6b)', items: ['Surah Al-Fatiha', 'Surah Yaseen', 'Surah Ar-Rahman', 'Surah Al-Kahf', 'Surah Al-Mulk', 'Surah Al-Waqiah', 'Full recitation — Mishary Alafasy', 'Full recitation — Abdul Basit'] },
+    { icon: 'fa-tv', title: 'TV', blurb: 'Box sets aloft', art: 'linear-gradient(135deg,#123,#2e5f8a)', items: ['PTFS Flight Diaries', 'The Cabin Crew Show', 'World Airports S7', 'Air Crash Investigations', 'Gate 24', 'Sky Pals'] },
+    { icon: 'fa-music', title: 'Music', blurb: '3,000+ tracks', art: 'linear-gradient(135deg,#4b1d6e,#8a3ab0)', items: ['Emirates Ambient', 'Desert Lounge', 'Classic Departures', 'Arabic Gold', 'Top of the Clouds', 'Runway Beats'] },
+    { icon: 'fa-gamepad', title: 'Games', blurb: 'Play at 41,000 ft', art: 'linear-gradient(135deg,#0f5132,#2fbf71)', items: ['Sky Chess', 'Aviation Trivia', 'Flight Trainer', 'Landing Challenge', 'Sudoku Aloft', 'Cloud Racer'] },
+    { icon: 'fa-child', title: 'Kids', blurb: 'For young pilots', art: 'linear-gradient(135deg,#a8620a,#f2a900)', items: ['Sky Pals Adventures', 'Colouring the Fleets', 'Junior Pilot School'] },
+    { icon: 'fa-utensils', title: 'Dining', blurb: 'Cabin service', art: 'linear-gradient(135deg,#5c0f27,#a3123a)', items: [] },
+    { icon: 'fa-route', title: 'Flight', blurb: 'Route & progress', art: 'linear-gradient(135deg,#1f2937,#4b5563)', items: [] }
 ];
 
 const ifeRoot = document.getElementById('ife-root');
 let ifeFlights = [];
-let ifeActiveFlight = null;
 
 function ifeEscape(value) {
     return String(value ?? '').replace(/[&<>'"]/g, (character) => ({
@@ -91,11 +92,16 @@ function ifeEscape(value) {
     })[character]);
 }
 
-function ifeTail(flightNumber) {
+function ifeTailSrc(flightNumber) {
     const match = String(flightNumber || '').trim().toUpperCase().match(/^([A-Z]{2})/);
     if (!match) return null;
     const map = { EK: 'assets/emirates-tail.png', FZ: 'assets/flydubai-tail.png' };
     return map[match[1]] || null;
+}
+
+function airportCodeIfe(destination) {
+    const match = String(destination || '').toUpperCase().match(/\(([A-Z]{3})\)\s*$/);
+    return match ? match[1] : String(destination || '—');
 }
 
 function haversineKm(a, b) {
@@ -107,35 +113,31 @@ function haversineKm(a, b) {
 }
 
 function routeDistanceKm(originCode, destination) {
-    const match = String(destination || '').toUpperCase().match(/\(([A-Z]{3})\)\s*$/);
-    const dest = match ? match[1] : null;
-    if (!dest || !AIRPORT_COORDS[originCode] || !AIRPORT_COORDS[dest]) return null;
+    const dest = airportCodeIfe(destination);
+    if (!AIRPORT_COORDS[originCode] || !AIRPORT_COORDS[dest]) return null;
     return Math.round(haversineKm(AIRPORT_COORDS[originCode], AIRPORT_COORDS[dest]));
 }
 
-// Flight duration: real-route distance when known, otherwise a sensible default
 function ifeDurationMinutes(flight) {
     const distance = routeDistanceKm('DXB', flight.destination);
     if (distance) return Math.round((distance / IFE_CONFIG.cruiseSpeedKmh) * 60 + 35);
     return flight.type === 'arrival' ? 240 : 120;
 }
 
-// A flight is "in the air" between departure and the estimated arrival
 function ifeFlightState(flight) {
     const start = flight.scheduledTs;
     const end = start + ifeDurationMinutes(flight) * 60000;
     const now = Date.now();
     if (now < start) return { state: 'before', minutesToStart: Math.round((start - now) / 60000), end };
-    if (now >= start && now < end) return { state: 'airborne', progress: (now - start) / (end - start), end };
+    if (now < end) return { state: 'airborne', progress: (now - start) / (end - start), end };
     return { state: 'arrived' };
 }
 
 function ifeNextFlight() {
-    const upcoming = ifeFlights
+    return ifeFlights
         .map((flight) => ({ flight, state: ifeFlightState(flight) }))
         .filter((entry) => entry.state.state === 'before')
-        .sort((a, b) => a.flight.scheduledTs - b.flight.scheduledTs);
-    return upcoming[0] || null;
+        .sort((a, b) => a.flight.scheduledTs - b.flight.scheduledTs)[0] || null;
 }
 
 async function ifeFetchMemberRoles() {
@@ -164,214 +166,269 @@ function ifeClassForRoles(roles) {
     return 'Economy';
 }
 
-function ifeShell() {
-    ifeRoot.innerHTML = `
-        <div class="ife-frame">
-            <div class="ife-brand">
-                <img src="assets/emirates-tail.png" alt="" class="brand-tail">
-                <span class="emirates-wordmark">EMARATES <small>IFE</small></span>
-                <span class="ife-live"><span class="live-dot"></span> On board</span>
-            </div>
-            <div class="ife-strip" id="ife-strip"></div>
-            <nav class="tabs ife-tabs" id="ife-tabs"></nav>
-            <div class="ife-body" id="ife-body"></div>
-            <p class="result-count" id="ife-note"></p>
-        </div>
-    `;
-}
+/* ---------- Screen chrome ---------- */
 
-function ifeRenderStrip(flight, state) {
-    const strip = document.getElementById('ife-strip');
+function iceShell(flight, state, cabin, user) {
+    const tail = ifeTailSrc(flight.flightNumber);
     const progress = Math.round((state?.progress ?? 0) * 100);
-    const isDeparture = flight.type === 'departure';
-    strip.innerHTML = `
-        <div class="ife-strip-main">
-            ${ifeTail(flight.flightNumber) ? `<img class="tail-logo" src="${ifeTail(flight.flightNumber).src}" alt="">` : ''}
-            <div>
-                <strong>${ifeEscape(flight.flightNumber)}</strong>
-                <span class="airline">${ifeEscape(flight.airline || 'Emirates PTFS')} · ${ifeEscape(flight.aircraft || 'A380-800')}</span>
-            </div>
+    const eta = Math.max(1, Math.round(((state?.end ?? Date.now()) - Date.now()) / 60000));
+    const etaText = `${Math.floor(eta / 60)}h ${String(eta % 60).padStart(2, '0')}m`;
+    ifeRoot.innerHTML = `
+      <div class="ice-cabin">
+        <div class="ice-screen">
+            <header class="ice-header">
+                <div class="ice-logo">
+                    <span class="ice-ek">EK</span>
+                    ${tail ? `<img src="${tail}" alt="" class="brand-tail">` : ''}
+                    <span class="emirates-wordmark">EMARATES <small>iCe</small></span>
+                </div>
+                <div class="ice-flight">
+                    <strong>${ifeEscape(flight.flightNumber)}</strong>
+                    <span>DXB <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(airportCodeIfe(flight.destination))} · ${ifeEscape(flight.aircraft || 'A380-800')}</span>
+                </div>
+                <div class="ice-status">
+                    <span class="ice-eta">${etaText} to arrival</span>
+                    <span class="live-dot"></span>
+                </div>
+            </header>
+
+            <div class="ice-progressbar"><div class="ice-progressfill" style="width:${progress}%"></div></div>
+
+            <main class="ice-main" id="ice-main"></main>
+
+            <footer class="ice-footer">
+                <span><i class="fas fa-user"></i> ${ifeEscape(user.name)} · ${IFE_MENUS[cabin].label}</span>
+                <span class="ice-clock" id="ice-clock"></span>
+            </footer>
         </div>
-        <div class="ife-progress">
-            <div class="ife-route-line">
-                <span>DXB</span>
-                <div class="progress-bar"><div class="progress-fill" style="width: ${isDeparture ? progress : 100}%"></div></div>
-                <span>${ifeEscape(airportCodeIfe(flight.destination))}</span>
-            </div>
-            <div class="progress-text">${isDeparture
-                ? `${progress}% complete · ${Math.max(1, Math.round((state.end - Date.now()) / 60000))} min to arrival`
-                : 'Welcome aboard — arriving shortly'}</div>
+        <div class="ice-seat" aria-hidden="true">
+            <div class="ice-seat-wing left"></div>
+            <div class="ice-seat-head"></div>
+            <div class="ice-seat-wing right"></div>
         </div>
+      </div>
     `;
+    const clock = document.getElementById('ice-clock');
+    const tick = () => { clock.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); };
+    tick();
+    setInterval(tick, 30000);
 }
 
-function airportCodeIfe(destination) {
-    const match = String(destination || '').toUpperCase().match(/\(([A-Z]{3})\)\s*$/);
-    return match ? match[1] : String(destination || '—');
-}
+/* ---------- Views ---------- */
 
-function ifeRoutePanel(flight) {
+function iceHomeView(flight, state, cabin) {
+    const ptfsFrom = flight.ptfsDeparture || airportCodeIfe(flight.destination);
+    const ptfsTo = flight.ptfsArrival || 'PTFS route not filed';
     const distance = routeDistanceKm('DXB', flight.destination);
     const durationMin = ifeDurationMinutes(flight);
-    const destCode = airportCodeIfe(flight.destination);
-    const isDeparture = flight.type === 'departure';
-    const from = isDeparture ? 'DXB' : destCode;
-    const to = isDeparture ? destCode : 'DXB';
-    const hours = Math.floor(durationMin / 60);
-    const minutes = durationMin % 60;
     return `
-        <div class="ife-routes">
-            <div class="ife-route-card">
+        <section class="ice-promo" style="background-image:${promoArtFor(flight)}">
+            <div class="ice-promo-inner">
+                <p class="ice-promo-kicker">Now on board</p>
+                <h2>Emarates iCe</h2>
+                <p>Over 3,000 channels of movies, music, games and live flight info — on every seat, on every flight.</p>
+                <button class="ice-cta" type="button" data-ice-view="Movies"><i class="fas fa-play"></i> Start watching</button>
+            </div>
+        </section>
+        <nav class="ice-tiles">
+            ${IFE_TILES.map((tile) => `
+                <button class="ice-tile" type="button" data-ice-view="${tile.title}" style="--tile-art:${tile.art}">
+                    <i class="fas ${tile.icon}"></i>
+                    <strong>${tile.title}</strong>
+                    <span>${tile.blurb}</span>
+                </button>`).join('')}
+        </nav>
+        <section class="ice-stripinfo">
+            <div>
                 <h4><i class="fas fa-gamepad"></i> PTFS route</h4>
-                <p class="ife-route-line-big">${from} <i class="fas fa-long-arrow-alt-right"></i> ${to}</p>
-                <ul>
-                    <li><span>Aircraft</span><strong>${ifeEscape(flight.aircraft || 'TBD')}</strong></li>
-                    <li><span>Terminal</span><strong>${ifeEscape(flight.terminal || 'TBD')}</strong></li>
-                    <li><span>Status</span><strong>${ifeEscape(flight.status)}</strong></li>
-                    <li><span>Event</span>${flight.discordEvent ? `<a class="event-chip" href="${ifeEscape(flight.discordEvent)}" target="_blank" rel="noopener">Open ↗</a>` : '—'}</li>
-                </ul>
+                <p>${ifeEscape(ptfsFrom)} <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(ptfsTo)}</p>
             </div>
-            <div class="ife-route-card">
+            <div>
                 <h4><i class="fas fa-globe"></i> Real-world route</h4>
-                <p class="ife-route-line-big">${from} <i class="fas fa-long-arrow-alt-right"></i> ${to}</p>
-                <ul>
-                    <li><span>Distance</span><strong>${distance ? `${distance.toLocaleString()} km` : '—'}</strong></li>
-                    <li><span>Block time</span><strong>${hours}h ${String(minutes).padStart(2, '0')}m</strong></li>
-                    <li><span>Cruise</span><strong>${IFE_CONFIG.cruiseSpeedKmh} km/h · 41,000 ft</strong></li>
-                    <li><span>Airline</span><strong>${ifeEscape(flight.airline || 'Emirates')}</strong></li>
-                </ul>
+                <p>${distance ? `${distance.toLocaleString()} km · ${Math.floor(durationMin / 60)}h ${String(durationMin % 60).padStart(2, '0')}m` : 'Distance upon departure'}</p>
             </div>
-        </div>
+            <div>
+                <h4><i class="fas fa-signal"></i> Status</h4>
+                <p>${ifeEscape(flight.status)} · Terminal ${ifeEscape(flight.terminal || 'TBD')}</p>
+            </div>
+        </section>
     `;
 }
 
-function ifeMenuPanel(flight, cabin) {
-    const menu = IFE_MENUS[cabin] || IFE_MENUS.Economy;
+function promoArtFor(flight) {
+    const photos = ['assets/photos/fleet-sunset-a380.png', 'assets/photos/fleet-moon-night.png', 'assets/photos/fleet-golden-fuselage.png', 'assets/photos/fleet-a350-flight.png'];
+    const pick = photos[String(flight.flightNumber).length % photos.length];
+    return `linear-gradient(100deg, rgba(10,11,13,.86) 30%, rgba(10,11,13,.25) 75%), url('${pick}')`;
+}
+
+function iceListView(viewId) {
+    const tile = IFE_TILES.find((entry) => entry.title === viewId);
+    if (!tile) return iceHomeViewSafe();
+    return `
+        <section class="ice-list">
+            <header class="ice-list-head" style="--tile-art:${tile.art}">
+                <button class="ice-back" type="button" data-ice-view="home"><i class="fas fa-arrow-left"></i> Home</button>
+                <h2><i class="fas ${tile.icon}"></i> ${tile.title}</h2>
+            </header>
+            <div class="ice-items">
+                ${tile.items.map((item) => `
+                    <button class="ice-item" type="button" data-title="${ifeEscape(item)}">
+                        <i class="fas fa-play-circle"></i> ${ifeEscape(item)}
+                    </button>`).join('')}
+            </div>
+        </section>
+    `;
+}
+
+function iceDiningView(cabin) {
+    const menu = IFE_MENUS[cabin];
     const premium = cabin !== 'Economy';
     return `
-        <div class="ife-menu-head">
-            <span class="flight-status ${cabin === 'First' || cabin === 'Charter' ? 'landed' : cabin === 'Business' ? 'boarding' : 'scheduled'}">${menu.label}</span>
-            ${premium ? '<span class="live-badge">Cabin verified</span>' : '<span class="live-badge" style="background: var(--surface); color: var(--muted);">Standard cabin</span>'}
-        </div>
-        ${IFE_MENUS[cabin] ? `
-        <div class="ife-menu">
-            ${menu.courses.map((course) => `
-                <div class="ife-course">
-                    <h4>${ifeEscape(course.name)}</h4>
-                    <ul>${course.items.map((item) => `<li>${ifeEscape(item)}</li>`).join('')}</ul>
-                </div>`).join('')}
-        </div>` : ''}
-        ${cabin === 'Economy' ? `
-        <div class="empty-state" style="margin-top: 1rem;">
-            <i class="fas fa-crown"></i>
-            <p>First and Business dining unlock automatically on board when your cabin role is verified.</p>
-        </div>` : ''}
+        <section class="ice-list">
+            <header class="ice-list-head" style="--tile-art:linear-gradient(135deg,#5c0f27,#a3123a)">
+                <button class="ice-back" type="button" data-ice-view="home"><i class="fas fa-arrow-left"></i> Home</button>
+                <h2><i class="fas fa-utensils"></i> ${menu.label}</h2>
+            </header>
+            <div class="ice-menu">
+                ${menu.courses.map((course) => `
+                    <div class="ice-course">
+                        <h4>${ifeEscape(course.name)}</h4>
+                        <ul>${course.items.map((item) => `<li>${ifeEscape(item)}</li>`).join('')}</ul>
+                    </div>`).join('')}
+            </div>
+            ${premium ? '' : `
+            <div class="ice-upgrade">
+                <i class="fas fa-crown"></i>
+                <p>First and Business dining unlock automatically when your cabin role is verified.</p>
+            </div>`}
+        </section>
     `;
 }
 
-function ifeEntertainmentPanel(flight) {
+function iceFlightView(flight, state) {
+    const isDeparture = flight.type === 'departure';
+    const progress = Math.round((state?.progress ?? 0) * 100);
+    const distance = routeDistanceKm('DXB', flight.destination);
+    const durationMin = ifeDurationMinutes(flight);
     return `
-        <div class="ife-entertainment">
-            ${IFE_ENTERTAINMENT.map((category) => `
-                <div class="ife-category">
-                    <h4><i class="fas ${category.icon}"></i> ${ifeEscape(category.title)}</h4>
-                    <div class="ife-tiles">
-                        ${category.items.map((item) => `
-                            <button class="ife-tile" type="button" data-title="${ifeEscape(item)}">
-                                <i class="fas fa-play-circle"></i>${ifeEscape(item)}
-                            </button>`).join('')}
-                    </div>
-                </div>`).join('')}
-        </div>
+        <section class="ice-list">
+            <header class="ice-list-head" style="--tile-art:linear-gradient(135deg,#1f2937,#4b5563)">
+                <button class="ice-back" type="button" data-ice-view="home"><i class="fas fa-arrow-left"></i> Home</button>
+                <h2><i class="fas fa-route"></i> Flight</h2>
+            </header>
+            <div class="ice-flightinfo">
+                <div class="ice-map">
+                    <span class="ice-code">${isDeparture ? 'DXB' : airportCodeIfe(flight.destination)}</span>
+                    <div class="ice-mapline"><i class="fas fa-plane" style="left:${progress}%"></i></div>
+                    <span class="ice-code">${isDeparture ? airportCodeIfe(flight.destination) : 'DXB'}</span>
+                </div>
+                <div class="ice-facts">
+                    <div><span>PTFS route</span><strong>${ifeEscape(flight.ptfsDeparture || '—')} → ${ifeEscape(flight.ptfsArrival || '—')}</strong></div>
+                    <div><span>Distance</span><strong>${distance ? `${distance.toLocaleString()} km` : '—'}</strong></div>
+                    <div><span>Block time</span><strong>${Math.floor(durationMin / 60)}h ${String(durationMin % 60).padStart(2, '0')}m</strong></div>
+                    <div><span>Aircraft</span><strong>${ifeEscape(flight.aircraft || 'TBD')}</strong></div>
+                    <div><span>Terminal</span><strong>${ifeEscape(flight.terminal || 'TBD')}</strong></div>
+                    <div><span>Status</span><strong>${ifeEscape(flight.status)}</strong></div>
+                </div>
+                ${flight.discordEvent ? `<a class="ice-event" href="${ifeEscape(flight.discordEvent)}" target="_blank" rel="noopener"><i class="fas fa-calendar-check"></i> Open the flight event</a>` : ''}
+            </div>
+        </section>
     `;
 }
 
-function ifeBindTabs(flight, state, cabin) {
-    const tabs = [
-        { id: 'route', label: 'Route', icon: 'fa-route' },
-        { id: 'menu', label: `Dining · ${IFE_MENUS[cabin].label.split(' ')[0]}`, icon: 'fa-utensils' },
-        { id: 'fun', label: 'Entertainment', icon: 'fa-film' }
-    ];
-    const tabBar = document.getElementById('ife-tabs');
-    const body = document.getElementById('ife-body');
-    let active = 'route';
+function iceHomeViewSafe() { return '<div class="ice-upgrade"><p>Unknown section.</p></div>'; }
 
-    const draw = () => {
-        tabBar.innerHTML = tabs.map((tabDef) => `
-            <button class="tab ${tabDef.id === active ? 'is-active' : ''}" type="button" data-ife-tab="${tabDef.id}">
-                <i class="fas ${tabDef.icon}"></i>${tabDef.label}
-            </button>`).join('');
-        body.innerHTML = active === 'route' ? ifeRoutePanel(flight)
-            : active === 'menu' ? ifeMenuPanel(flight, cabin)
-            : ifeEntertainmentPanel(flight);
-        body.querySelectorAll('[data-ife-tab]').forEach((button) => button.addEventListener('click', () => { active = button.dataset.ifeTab; draw(); }));
-        body.querySelectorAll('.ife-tile').forEach((tile) => tile.addEventListener('click', () => {
-            tile.classList.toggle('playing');
-            const note = document.getElementById('ife-note');
-            if (note) note.textContent = `${tile.dataset.title} — queued on your seat-back screen`;
-        }));
-    };
-    draw();
-}
+/* ---------- Locked states ---------- */
 
-function ifeRenderLocked(reasonHtml) {
+function iceLocked(reasonHtml) {
     ifeRoot.innerHTML = `
-        <div class="ife-frame">
-            <div class="ife-brand">
-                <img src="assets/emirates-tail.png" alt="" class="brand-tail">
-                <span class="emirates-wordmark">EMARATES <small>IFE</small></span>
-            </div>
-            <div class="empty-state ife-locked">
+      <div class="ice-cabin">
+        <div class="ice-screen ice-screen-locked">
+            <header class="ice-header">
+                <div class="ice-logo">
+                    <span class="ice-ek">EK</span>
+                    <img src="assets/emirates-tail.png" alt="" class="brand-tail">
+                    <span class="emirates-wordmark">EMARATES <small>iCe</small></span>
+                </div>
+            </header>
+            <div class="ice-locked">
                 <i class="fas fa-lock"></i>
-                <p>${reasonHtml}</p>
-                <a class="btn outline small" href="booking.html"><i class="fas fa-calendar-week"></i> View the weekly schedule</a>
+                <div>${reasonHtml}</div>
+                <a class="ice-cta" href="booking.html"><i class="fas fa-calendar-week"></i> Weekly schedule</a>
             </div>
         </div>
+        <div class="ice-seat" aria-hidden="true">
+            <div class="ice-seat-wing left"></div>
+            <div class="ice-seat-head"></div>
+            <div class="ice-seat-wing right"></div>
+        </div>
+      </div>
     `;
+}
+
+/* ---------- Engine ---------- */
+
+function iceNavigate(view, flight, state, cabin) {
+    const main = document.getElementById('ice-main');
+    if (!main) return;
+    if (view === 'home') main.innerHTML = iceHomeView(flight, state, cabin);
+    else if (view === 'Dining') main.innerHTML = iceDiningView(cabin);
+    else if (view === 'Flight') main.innerHTML = iceFlightView(flight, state);
+    else main.innerHTML = iceListView(view);
+    main.querySelectorAll('[data-ice-view]').forEach((button) => {
+        button.addEventListener('click', () => iceNavigate(button.dataset.iceView, flight, state, cabin));
+    });
+    main.querySelectorAll('.ice-item').forEach((item) => {
+        item.addEventListener('click', () => {
+            item.classList.toggle('playing');
+            const note = document.getElementById('ice-note');
+            if (note) note.textContent = `${item.dataset.title} — now playing on your seat-back screen`;
+            const footer = document.querySelector('.ice-footer');
+            if (footer && !document.getElementById('ice-note')) {
+                const span = document.createElement('span');
+                span.id = 'ice-note';
+                footer.prepend(span);
+            }
+            if (note) { note.textContent = `${item.dataset.title} — now playing`; setTimeout(() => { note.textContent = ''; }, 4000); }
+        });
+    });
+    main.scrollTop = 0;
 }
 
 async function initIfe() {
     if (!ifeRoot) return;
 
-    // 1. Login required
     const user = typeof getDiscordUser === 'function' ? getDiscordUser() : null;
     if (!user) {
-        ifeRenderLocked('Emarates IFE is available to signed-in crew. Log in with Discord from the crew gallery on the home page, then return here.');
+        iceLocked('<p><strong>Emarates iCe is available to signed-in passengers.</strong></p><p>Log in with Discord from the crew gallery on the home page, then return to your seat.</p>');
         return;
     }
 
-    // 2. Flights from the FIDS
     try {
         ifeFlights = await fetchWeeklyFlights();
     } catch (error) {
-        ifeRenderLocked('The flight data service is unreachable right now. Try again in a moment.');
+        iceLocked('<p>The flight data service is unreachable right now. The cabin crew will restore it shortly.</p>');
         return;
     }
 
-    // 3. Flight-time gate
     const airborne = ifeFlights.filter((flight) => ifeFlightState(flight).state === 'airborne');
     if (!airborne.length) {
         const next = ifeNextFlight();
-        ifeRenderLocked(`
-            <strong>No flight is in the air right now.</strong><br>
-            Emarates IFE unlocks while one of our flights is between departure and arrival.
-            ${next ? `<br><br>Next departure: <strong>${ifeEscape(next.flight.flightNumber)}</strong> in about <strong>${Math.floor(next.state.minutesToStart / 60)}h ${next.state.minutesToStart % 60}m</strong>.` : ''}
+        iceLocked(`
+            <p><strong>Your iCe system starts after departure.</strong></p>
+            <p>iCe is available while one of our flights is between departure and arrival.</p>
+            ${next ? `<p>Next departure: <strong>${ifeEscape(next.flight.flightNumber)}</strong> in about <strong>${Math.floor(next.state.minutesToStart / 60)}h ${next.state.minutesToStart % 60}m</strong>.</p>` : ''}
         `);
         return;
     }
 
-    ifeActiveFlight = airborne[0];
-    const state = ifeFlightState(ifeActiveFlight);
-
-    // 4. Cabin role check (First / Business / Charter) before loading menus
+    const flight = airborne[0];
+    const state = ifeFlightState(flight);
     const roles = await ifeFetchMemberRoles();
     const cabin = ifeClassForRoles(roles);
 
-    ifeShell();
-    ifeRenderStrip(ifeActiveFlight, state);
-    ifeBindTabs(ifeActiveFlight, state, cabin);
-    const note = document.getElementById('ife-note');
-    if (note) note.textContent = `Welcome aboard, ${user.name}. Dining menus are matched to your verified cabin.`;
+    iceShell(flight, state, cabin, user);
+    iceNavigate('home', flight, state, cabin);
 }
 
 initIfe();
