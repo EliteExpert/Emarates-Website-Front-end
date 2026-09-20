@@ -711,7 +711,7 @@ function renderGalleryTool() {
 
     if (!user) {
         const loginHref = DISCORD_OAUTH_CLIENT_ID
-            ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(DISCORD_OAUTH_CLIENT_ID)}&redirect_uri=${encodeURIComponent(location.origin + location.pathname)}&response_type=token&scope=identify`
+            ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(DISCORD_OAUTH_CLIENT_ID)}&redirect_uri=${encodeURIComponent(location.origin + location.pathname)}&response_type=token&scope=identify%20guilds.members.read`
             : '';
         body.innerHTML = `
             <h3>Add a photo to the gallery</h3>

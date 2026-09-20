@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#d71921">
+    <meta name="description" content="Emarates IFE — in-flight entertainment for Emirates PTFS flights. Route maps, class dining menus and entertainment, available on board.">
+    <title>Emarates IFE - Emirates PTFS</title>
+    <script>document.documentElement.dataset.theme = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');</script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <div id="header"></div>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <div>
+                <p class="eyebrow">On board entertainment</p>
+                <h1>Emarates IFE</h1>
+                <p class="intro">Your flight, your screen. Unlocked while you're in the air.</p>
+            </div>
+            <div class="flip-clock" id="live-clock" aria-label="Current GMT time" role="timer"></div>
+        </div>
+    </section>
+
+    <!-- IFE -->
+    <section class="status-section ife-section">
+        <div class="container" id="ife-root">
+            <div class="empty-state">
+                <i class="fas fa-circle-notch fa-spin"></i>
+                <p>Connecting to the aircraft…</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer"></div>
+
+    <script src="script.js"></script>
+    <script src="ife.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const headerElement = document.getElementById('header');
+        if (headerElement) {
+            fetch('components/header.html')
+                .then(response => response.text())
+                .then(data => { headerElement.innerHTML = data; reinitComponents(); })
+                .catch(error => console.error('Error loading header:', error));
+        }
+        const footerElement = document.getElementById('footer');
+        if (footerElement) {
+            fetch('components/footer.html')
+                .then(response => response.text())
+                .then(data => { footerElement.innerHTML = data; initFooterYear(); })
+                .catch(error => console.error('Error loading footer:', error));
+        }
+    });
+</script>
+</body>
+</html>

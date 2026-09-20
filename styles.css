@@ -1101,3 +1101,120 @@ html[data-theme="dark"] body {
   cursor: copy; user-select: all; word-break: break-all;
 }
 .redirect-uri.copied { border-color: #177141; color: #177141; }
+
+/* ============ Emarates IFE ============ */
+.ife-frame {
+  background: var(--white);
+  border: 1px solid #e9eaeb;
+  border-radius: 20px;
+  box-shadow: 0 6px 19px rgb(26 31 36 / .055);
+  overflow: hidden;
+}
+.ife-brand {
+  display: flex; align-items: center; gap: 11px;
+  padding: 1.2rem 1.6rem;
+  background: linear-gradient(130deg, #23272b 0%, #2e3338 100%);
+  color: #fff;
+}
+.ife-brand .emirates-wordmark { color: #fff; font-size: 18px; }
+.ife-brand .brand-tail { width: 30px; height: 30px; }
+.ife-live {
+  margin-left: auto; display: inline-flex; align-items: center; gap: .45rem;
+  font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: #7be2a8;
+}
+.ife-strip {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.4rem;
+  flex-wrap: wrap;
+  padding: 1.2rem 1.6rem;
+  border-bottom: 1px solid var(--line);
+}
+.ife-strip-main { display: flex; align-items: center; gap: .8rem; }
+.ife-strip-main strong {
+  font-family: "Emirates Medium", Arial, sans-serif; font-size: 1.3rem; letter-spacing: -.01em; display: block;
+}
+.ife-strip-main .airline { color: var(--muted); font-size: 12.5px; }
+.ife-progress { flex: 1; min-width: 260px; }
+.ife-route-line { display: flex; align-items: center; gap: .8rem; font-weight: 700; font-size: .85rem; }
+.ife-route-line .progress-bar { flex: 1; }
+.ife-route-line .progress-fill { transition: width 1s ease; }
+.ife-tabs { margin: 1.2rem 1.6rem 0; }
+.ife-body { padding: 1.4rem 1.6rem 1.6rem; }
+
+.ife-routes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
+.ife-route-card {
+  border: 1px solid var(--line); border-radius: 16px; padding: 1.3rem 1.4rem;
+  background: var(--surface);
+}
+.ife-route-card h4 {
+  font-family: "Emirates Medium", Arial, sans-serif; font-weight: 600;
+  font-size: 1.02rem; letter-spacing: -.01em; margin-bottom: .7rem;
+}
+.ife-route-card h4 i { color: var(--muted); margin-right: .35rem; }
+.ife-route-line-big {
+  font-family: "Emirates Medium", Arial, sans-serif;
+  font-size: 1.9rem; font-weight: 700; letter-spacing: -.02em;
+  display: flex; align-items: center; gap: .7rem; margin: 0 0 .9rem;
+}
+.ife-route-line-big i { color: var(--primary); font-size: 1.2rem; }
+.ife-route-card ul { list-style: none; }
+.ife-route-card li {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--line); font-size: 14px;
+}
+.ife-route-card li:last-child { border-bottom: 0; }
+.ife-route-card li span { color: var(--muted); }
+.ife-route-card li strong { font-weight: 700; }
+
+.ife-menu-head { display: flex; align-items: center; gap: .7rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.ife-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
+.ife-course {
+  border: 1px solid var(--line); border-radius: 14px; padding: 1.1rem 1.2rem;
+  background: var(--surface);
+}
+.ife-course h4 {
+  font-family: "Emirates Medium", Arial, sans-serif; font-weight: 600;
+  font-size: .95rem; letter-spacing: .02em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: .6rem;
+}
+.ife-course ul { list-style: none; }
+.ife-course li { padding: .3rem 0 .3rem 1.1rem; position: relative; font-size: 14px; }
+.ife-course li::before { content: "2"; position: absolute; left: .2rem; color: var(--primary); }
+
+.ife-entertainment { display: grid; gap: 1.4rem; }
+.ife-category h4 {
+  font-family: "Emirates Medium", Arial, sans-serif; font-weight: 600;
+  font-size: 1.02rem; letter-spacing: -.01em; margin-bottom: .8rem;
+}
+.ife-category h4 i { color: var(--muted); margin-right: .4rem; }
+.ife-tiles { display: flex; flex-wrap: wrap; gap: .6rem; }
+.ife-tile {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .6rem 1rem; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--white);
+  color: var(--ink); font-size: 13.5px; font-weight: 600; cursor: pointer;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+.ife-tile i { color: var(--primary); }
+.ife-tile:hover { transform: translateY(-2px); border-color: #aeb4bb; }
+.ife-tile.playing { background: var(--ink); color: #fff; border-color: var(--ink); }
+.ife-tile.playing i { color: #f2c94c; }
+
+.ife-locked { padding: 3.4rem 2rem; background: var(--white); border-style: solid; border-color: #e9eaeb; }
+.ife-locked strong { color: var(--ink); }
+.ife-locked .btn { margin-top: 1.1rem; }
+
+[data-theme="dark"] .ife-frame { background: var(--white); border-color: var(--card-line); }
+[data-theme="dark"] .ife-strip { border-bottom-color: var(--line); }
+[data-theme="dark"] .ife-route-card, [data-theme="dark"] .ife-course { background: var(--surface); border-color: var(--line); }
+[data-theme="dark"] .ife-route-card li { border-bottom-color: var(--line); }
+[data-theme="dark"] .ife-tile { background: var(--white); border-color: var(--line); }
+[data-theme="dark"] .ife-tile.playing { background: #e8eaed; color: #17191b; border-color: #e8eaed; }
+[data-theme="dark"] .ife-locked { background: var(--white); border-color: var(--card-line); }
+
+@media (max-width: 620px) {
+  .ife-strip { padding: 1rem; }
+  .ife-tabs { margin: 1rem 1rem 0; }
+  .ife-body { padding: 1rem; }
+  .ife-route-line-big { font-size: 1.5rem; }
+}
