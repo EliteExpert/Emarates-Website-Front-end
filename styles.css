@@ -982,6 +982,10 @@ html[data-theme="dark"] body {
 [data-theme="dark"] .step-number { background: #e8eaed; color: #17191b; }
 [data-theme="dark"] .btn.danger { background: #d45048; }
 
+/* The IFE page keeps the site header opaque so it never shows the
+   seat screen through it while scrolling */
+body.ife-page header { background: var(--white); }
+
 /* Theme toggle button */
 .theme-toggle {
   display: inline-flex; align-items: center; justify-content: center;
@@ -1150,10 +1154,12 @@ html[data-theme="dark"] body {
 /* White screen body */
 .ice-body {
   position: relative; flex: 1; min-height: 0;
-  background: #fff;
+  background:
+    linear-gradient(110deg, rgb(8 9 12 / .82) 0%, rgb(8 9 12 / .45) 48%, rgb(8 9 12 / .8) 100%),
+    url('assets/photos/fleet-moon-night.png') center/cover no-repeat;
   padding: 1.2em 1.4em;
   display: flex; flex-direction: column; gap: 1em;
-  overflow: hidden;
+  overflow-y: auto;
   color: #25272b;
 }
 
@@ -1163,9 +1169,10 @@ html[data-theme="dark"] body {
 .ice-welcome-title {
   font-family: "Emirates Medium", Arial, sans-serif;
   font-size: 2.6em; font-weight: 600; letter-spacing: 0;
-  color: #25272b; margin: 0 0 .15em;
+  color: #fff; margin: 0 0 .15em;
+  text-shadow: 0 2px 10px rgb(0 0 0 / .55);
 }
-.ice-welcome-select { font-family: Arial, Helvetica, sans-serif; color: #6b7178; font-size: .95em; margin: 0 0 1em; }
+.ice-welcome-select { font-family: Arial, Helvetica, sans-serif; color: #e8eaed; font-size: .95em; margin: 0 0 1em; text-shadow: 0 1px 6px rgb(0 0 0 / .6); }
 .ice-buttons { display: flex; gap: 1.4em; }
 .ice-btn-wrap { display: flex; flex-direction: column; align-items: center; gap: .45em; }
 .ice-btn {
@@ -1185,7 +1192,8 @@ html[data-theme="dark"] body {
 .ice-btn-e { background: linear-gradient(180deg, #8ba4f9 0%, #5470e0 55%, #3550bd 100%); }
 .ice-btn-wrap > em {
   font-style: normal; font-family: Arial, Helvetica, sans-serif;
-  font-size: .78em; color: #25272b; white-space: nowrap;
+  font-size: .78em; color: #fff; white-space: nowrap;
+  text-shadow: 0 1px 5px rgb(0 0 0 / .65);
 }
 
 /* Side box */
@@ -1256,7 +1264,11 @@ html[data-theme="dark"] body {
 .ice-map-missing { color: #74777d; font-size: .85em; padding: .6em 0; }
 
 /* Section panels (I / C / E) */
-.ice-section-head { display: flex; align-items: center; gap: .8em; margin-bottom: .8em; }
+.ice-section-head {
+  display: flex; align-items: center; gap: .8em; margin-bottom: .8em;
+  background: #fff; border: 1px solid #e2e4e7;
+  border-radius: .7em; padding: .5em .8em;
+}
 .ice-section-head h3 {
   font-family: "Emirates Medium", Arial, sans-serif;
   font-size: 1.25em; font-weight: 600; letter-spacing: 0; color: #25272b; margin: 0;
@@ -1290,7 +1302,11 @@ html[data-theme="dark"] body {
 .ice-contact i:last-child { color: #9aa0a6; font-size: .8em; }
 
 /* Quiz */
-.ice-quiz { min-height: 8em; }
+.ice-quiz {
+  min-height: 8em;
+  background: #fff; border: 1px solid #e2e4e7;
+  border-radius: .8em; padding: .9em 1em;
+}
 .ice-quiz-step {
   display: block; color: #74777d; font-size: .74em; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase; margin-bottom: .3em;

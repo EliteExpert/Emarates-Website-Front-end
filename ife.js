@@ -125,13 +125,13 @@ function iceShell() {
         <div class="ife-seat-base">
             <img class="ife-photo" src="assets/photos/seat-back-base.png" alt="Your Emirates seat back with the Emarates ICE screen">
             <div class="ife-screen-overlay">
-                <header class="ice-topbar">
+                <div class="ice-topbar">
                     <span class="ice-logo-red">Emarates</span>
                     <span class="ice-topbar-route">
                         <span id="ice-topbar-flight">Emarates ICE</span>
                     </span>
                     <span class="ice-topbar-duration"><i class="fas fa-clock"></i> 1hr flight</span>
-                </header>
+                </div>
                 <div class="ice-body" id="ice-body"></div>
             </div>
         </div>
