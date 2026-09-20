@@ -119,12 +119,6 @@ function ifeRouteEndpoints(flight) {
         : { from: city, to: 'Dubai' };
 }
 
-function ifePtfsEndpoints(flight) {
-    return flight.type === 'departure'
-        ? { from: 'Dubai', to: String(flight.ptfsArrival || 'PTFS') }
-        : { from: String(flight.ptfsDeparture || 'PTFS'), to: 'Dubai' };
-}
-
 function ifeDestinationCity(flight) {
     // "Dubai to Sydney" — strip any (XXX) code and take the city part
     return String(flight.destination || '')
@@ -229,7 +223,7 @@ function iceWelcomeView(active, user) {
         sideBox = `
             <div class="ice-side-info">
                 <h4><i class="fas fa-route"></i> Now flying</h4>
-                <p class="ice-side-route">${ifeEscape(ifePtfsEndpoints(flight).from)} <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(ifePtfsEndpoints(flight).to)}</p>
+                <p class="ice-side-route">${ifeEscape(flight.ptfsDeparture || 'PTFS')} <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(flight.ptfsArrival || 'PTFS')}</p>
                 <div class="ice-minimap" id="ice-minimap" title="Click to enlarge the map">${iceMapSvg(flight, active.state, true)}</div>
                 <ul>
                     <li><span>Real route</span><strong>${ifeEscape(ifeRouteEndpoints(flight).from)} <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(ifeRouteEndpoints(flight).to)}</strong></li>
@@ -299,7 +293,7 @@ function iceInfoPanel(flight, state) {
             <ul class="ice-info-list">
                 <li><span>Flight</span><strong>${ifeEscape(flight.flightNumber)}</strong></li>
                 <li><span>Route</span><strong>${ifeEscape(ifeRouteEndpoints(flight).from)} to ${ifeEscape(ifeRouteEndpoints(flight).to)}</strong></li>
-                <li><span>PTFS route</span><strong>${ifeEscape(ifePtfsEndpoints(flight).from)} to ${ifeEscape(ifePtfsEndpoints(flight).to)}</strong></li>
+                <li><span>PTFS route</span><strong>${ifeEscape(flight.ptfsDeparture || '—')} to ${ifeEscape(flight.ptfsArrival || '—')}</strong></li>
                 <li><span>Duration</span><strong>1hr</strong></li>
                 <li><span>Aircraft</span><strong>${ifeEscape(flight.aircraft || 'A380-800')}</strong></li>
                 <li><span>Terminal</span><strong>${ifeEscape(flight.terminal || 'T3')}</strong></li>
