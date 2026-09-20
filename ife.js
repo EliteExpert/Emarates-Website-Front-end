@@ -184,7 +184,6 @@ function iceWelcomeView(active, user) {
 
     return `
         <div class="ice-welcome">
-            <div class="ice-welcome-bg"></div>
             <div class="ice-welcome-inner">
                 <h1 class="ice-welcome-title">Welcome</h1>
                 <p class="ice-welcome-select">Select to begin…</p>

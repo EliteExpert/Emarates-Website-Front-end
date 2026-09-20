@@ -34,7 +34,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   color: var(--ink);
-  background: linear-gradient(130deg, #fff 0%, #f7f7f7 48%, #f0f1f2 100%);
+  background: #fff;
   line-height: 1.55;
   overflow-x: hidden;
   padding-top: 71px;
@@ -1155,7 +1155,7 @@ html[data-theme="dark"] body {
 }
 
 /* Welcome: title + ICE buttons exactly like the seat-back photo */
-.ice-welcome { display: grid; grid-template-columns: 1.1fr .9fr; gap: 1em; flex: 1; min-height: 0; }
+.ice-welcome { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; flex: 1; min-height: 0; align-items: end; }
 .ice-welcome-inner { display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; }
 .ice-welcome-title {
   font-family: "Emirates Medium", Arial, sans-serif;
@@ -1177,7 +1177,7 @@ html[data-theme="dark"] body {
   transition: transform .16s ease, filter .16s ease;
 }
 .ice-btn:hover { transform: translateY(-0.15em) scale(1.03); filter: brightness(1.07); }
-.ice-btn span { font-size: 2.5em; font-weight: 700; line-height: 1; text-shadow: 0 .06em .18em rgb(0 0 0 / .35); }
+.ice-btn span { font-family: "Emirates Medium", Arial, sans-serif; font-size: 2.2em; font-weight: 700; line-height: 1; text-shadow: 0 .06em .18em rgb(0 0 0 / .35); }
 .ice-btn-i { background: linear-gradient(180deg, #96e08e 0%, #4fbb58 55%, #2f9040 100%); }
 .ice-btn-c { background: linear-gradient(180deg, #f79ad2 0%, #d455a8 55%, #b23a8c 100%); }
 .ice-btn-e { background: linear-gradient(180deg, #8ba4f9 0%, #5470e0 55%, #3550bd 100%); }
