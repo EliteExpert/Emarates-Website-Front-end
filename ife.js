@@ -469,7 +469,7 @@ async function iceRenderSection(section, active, user) {
                 <button class="ice-mini-btn" type="button" data-ice="home"><i class="fas fa-arrow-left"></i> Welcome</button>
                 <h3>Communication</h3>
             </div>
-            ${await iceCommsPanel(flight)}`;
+            ${await iceCommsPanel(active.flight)}`;
     } else {
         body.innerHTML = `
             <div class="ice-section-head">
