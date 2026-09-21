@@ -476,6 +476,7 @@ header {
 .flights-empty .btn { margin-top: 1rem; }
 .event-chip {
   display: inline-flex; align-items: center; gap: .35rem;
+  margin-left: .65rem;
   font-size: .78rem; font-weight: 700; color: var(--discord);
   text-decoration: none; border: 1px solid var(--discord);
   border-radius: 99px; padding: .18rem .65rem;
