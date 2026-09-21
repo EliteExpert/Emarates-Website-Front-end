@@ -8,8 +8,11 @@ const IFE_CONFIG = {
     cruiseSpeedKmh: 902,
     // Role IDs allowed to author the flight quiz (paste from Discord)
     quizAdminRoleIds: [],           // e.g. ['1416276747246244013']
-    firstClassRoleIds: [],
-    businessClassRoleIds: []
+    // Class dining is picked from these roles; highest wins
+    // (First > Charter > Business > Economy as fallback).
+    firstClassRoleIds: ['1331853227720708146'],
+    charterRoleIds: [],
+    businessClassRoleIds: ['1331852990629417020']
 };
 
 // The PTFS world — departure/arrival must come from these airports,
@@ -82,6 +85,7 @@ const IFE_CONTACTS = [
 const ifeRoot = document.getElementById('ife-root');
 let ifeFlights = [];
 let ifeQuiz = null;
+let ifeActive = null;
 
 function ifeEscape(value) {
     return String(value ?? '').replace(/[&<>'"]/g, (character) => ({
@@ -239,15 +243,15 @@ function iceWelcomeView(active, user) {
                 <p class="ice-welcome-select">Select to begin…</p>
                 <div class="ice-buttons">
                     <div class="ice-btn-wrap">
-                        <button class="ice-btn ice-btn-i" type="button" data-ice="i" aria-label="Information"><span>i</span></button>
+                        <button class="ice-btn ice-btn-i" type="button" data-ice="i" aria-label="Information"${user ? '' : ' disabled'}><span>i</span></button>
                         <em>Information</em>
                     </div>
                     <div class="ice-btn-wrap">
-                        <button class="ice-btn ice-btn-c" type="button" data-ice="c" aria-label="Communication"><span>C</span></button>
+                        <button class="ice-btn ice-btn-c" type="button" data-ice="c" aria-label="Communication"${user ? '' : ' disabled'}><span>C</span></button>
                         <em>Communication</em>
                     </div>
                     <div class="ice-btn-wrap">
-                        <button class="ice-btn ice-btn-e" type="button" data-ice="e" aria-label="Entertainment"><span>e</span></button>
+                        <button class="ice-btn ice-btn-e" type="button" data-ice="e" aria-label="Entertainment"${user ? '' : ' disabled'}><span>e</span></button>
                         <em>Entertainment</em>
                     </div>
                 </div>
@@ -502,6 +506,15 @@ async function initIfe() {
     iceShell();
     const user = typeof getDiscordUser === 'function' ? getDiscordUser() : null;
 
+    // Login can land back on this page with the token still in the URL;
+    // script.js settles it after DOMContentLoaded and announces the change,
+    // so the disabled buttons can enable without a manual reload.
+    window.addEventListener('discord-auth-changed', () => {
+        if (!document.querySelector('#ice-body .ice-buttons')) return;
+        const freshUser = typeof getDiscordUser === 'function' ? getDiscordUser() : null;
+        iceRenderSection('home', ifeActive, freshUser);
+    });
+
     try {
         ifeFlights = await fetchWeeklyFlights();
     } catch (error) {
@@ -515,10 +528,10 @@ async function initIfe() {
         .map((flight) => ({ flight, state: ifeFlightState(flight) }))
         .filter((entry) => entry.state.state === 'airborne')
         .sort((a, b) => b.flight.scheduledTs - a.flight.scheduledTs);
-    const active = airborne[0] || null;
+    ifeActive = airborne[0] || null;
 
-    if (active) iceTopbarUpdate(active.flight);
-    await iceRenderSection('home', active, user);
+    if (ifeActive) iceTopbarUpdate(ifeActive.flight);
+    await iceRenderSection('home', ifeActive, user);
 }
 
 initIfe();

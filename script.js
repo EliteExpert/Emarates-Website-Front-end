@@ -694,6 +694,7 @@ async function initDiscordAuth() {
         }
     }
     renderGalleryTool();
+    window.dispatchEvent(new CustomEvent('discord-auth-changed'));
 }
 
 function discordLogout() {
@@ -701,6 +702,7 @@ function discordLogout() {
     localStorage.removeItem('discord-user');
     renderGalleryTool();
     renderGallery();
+    window.dispatchEvent(new CustomEvent('discord-auth-changed'));
 }
 window.discordLogout = discordLogout;
 
