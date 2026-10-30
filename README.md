@@ -26,4 +26,3 @@ The site uses the local Emirates Medium font and curated aviation photos in `ass
 ## Discord sign-in
 
 The header sign-in uses Discord OAuth2 authorization code + PKCE. The Discord application must be configured as a public client with `https://<your-domain>/index.html` registered as an OAuth2 redirect URL. No client secret is stored in the front end.
-
