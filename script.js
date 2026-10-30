@@ -6,13 +6,6 @@ const DISCORD_INVITE = "https://discord.gg/PJVAvbJbdn";
 const DISCORD_OAUTH_CLIENT_ID = "1550876222719004703";
 const OAUTH_PKCE_KEY = "discord-pkce";
 
-const SAMPLE_FLIGHTS = [
-  { date: "2026-10-30", departureTime: "18:30", flightNumber: "EK 004", destination: "London (LHR)", aircraft: "A380", terminal: "3", status: "Boarding", type: "departure" },
-  { date: "2026-10-31", departureTime: "01:15", flightNumber: "EK 318", destination: "Tokyo (NRT)", aircraft: "A380", terminal: "3", status: "Scheduled", type: "departure" },
-  { date: "2026-10-31", departureTime: "09:40", flightNumber: "EK 202", destination: "New York (JFK)", aircraft: "A380", terminal: "3", status: "Scheduled", type: "departure" },
-  { date: "2026-11-01", departureTime: "16:05", flightNumber: "EK 501", destination: "Mumbai (BOM)", aircraft: "777-300ER", terminal: "3", status: "Scheduled", type: "departure" }
-];
-
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>\"']/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
@@ -161,17 +154,21 @@ function normalizeFlight(flight) {
 }
 
 async function fetchWeeklyFlights() {
-  try {
-    const response = await fetch(`${FIDS_URL}/api/flights`, { headers: { Accept: "application/json" } });
-    if (!response.ok) throw new Error("Flight service unavailable");
-    const payload = await response.json();
-    const flights = Array.isArray(payload) ? payload : payload.flights;
-    if (!Array.isArray(flights) || !flights.length) throw new Error("No flight data");
-    return flights.map(normalizeFlight).sort((a, b) => a.scheduledTs - b.scheduledTs);
-  } catch (error) {
-    console.warn("Using local flight board fallback:", error.message);
-    return SAMPLE_FLIGHTS.map(normalizeFlight);
+  // Same-origin Vercel proxy first (the FIDS API sends no CORS headers),
+  // then the FIDS endpoint directly as a fallback.
+  const sources = ["/api/flights", `${FIDS_URL}/api/flights`];
+  let lastError = new Error("Flight service unavailable");
+  for (const url of sources) {
+    try {
+      const response = await fetch(url, { headers: { Accept: "application/json" } });
+      if (!response.ok) throw new Error(`Flight service unavailable (${response.status})`);
+      const payload = await response.json();
+      const flights = Array.isArray(payload) ? payload : payload.flights;
+      if (!Array.isArray(flights)) throw new Error("Unexpected flight data");
+      return flights.map(normalizeFlight).sort((a, b) => a.scheduledTs - b.scheduledTs);
+    } catch (error) { lastError = error; }
   }
+  throw lastError;
 }
 
 function formatTime(timestamp) {
@@ -191,6 +188,14 @@ function codeName(value) {
   return match ? match[1] : "DXB";
 }
 
+// Mirrors the FIDS departures board: past-scheduled departures read as
+// "Departed" unless the airline marked them Delayed/Cancelled.
+function liveStatus(flight) {
+  if (["Delayed", "Cancelled"].includes(flight.status)) return flight.status;
+  if (flight.type === "departure" && flight.scheduledTs <= Date.now()) return "Departed";
+  return flight.status;
+}
+
 function airlineTailMarkup(flightNumber) {
   const code = String(flightNumber || "").trim().toUpperCase().match(/^([A-Z]{2})/)?.[1];
   const tails = {
@@ -204,15 +209,23 @@ function airlineTailMarkup(flightNumber) {
 }
 
 function flightRow(flight) {
-  const destination = cityName(flight.destination);
+  const isDeparture = flight.type !== "arrival";
+  const city = cityName(flight.destination);
   const code = codeName(flight.destination);
-  return `<article class="flight-row" data-flight-search="${escapeHtml(`${flight.flightNumber} ${destination} ${flight.aircraft} ${flight.status}`.toLowerCase())}">
+  const status = liveStatus(flight);
+  // FIDS stores the filed airport in `destination` for both types: the
+  // other end of the route. Arrivals therefore read "<city> → Dubai".
+  const route = isDeparture
+    ? `Dubai <span aria-hidden="true">→</span> ${escapeHtml(city)}`
+    : `${escapeHtml(city)} <span aria-hidden="true">→</span> Dubai`;
+  const routeCodes = isDeparture ? `DXB → ${escapeHtml(code)}` : `${escapeHtml(code)} → DXB`;
+  return `<article class="flight-row" data-flight-search="${escapeHtml(`${flight.flightNumber} ${city} ${flight.aircraft} ${status} ${isDeparture ? "departure" : "arrival"}`.toLowerCase())}">
     <time datetime="${new Date(flight.scheduledTs).toISOString()}"><span class="flight-time-value">${formatTime(flight.scheduledTs)}</span><small>${formatDate(flight.scheduledTs)}</small></time>
     ${airlineTailMarkup(flight.flightNumber)}
-    <div class="flight-route"><span class="flight-code">${escapeHtml(flight.flightNumber)}</span><strong>Dubai <span aria-hidden="true">→</span> ${escapeHtml(destination)}</strong><small>DXB → ${escapeHtml(code)}</small></div>
+    <div class="flight-route"><span class="flight-code">${escapeHtml(flight.flightNumber)}</span><span class="flight-kind">${isDeparture ? "Departure" : "Arrival"}</span><strong>${route}</strong><small>${routeCodes}</small></div>
     <div class="flight-aircraft"><small>Aircraft</small><strong>${escapeHtml(flight.aircraft)}</strong></div>
     <div class="flight-terminal"><small>Terminal</small><strong>Terminal ${escapeHtml(flight.terminal || "3")}</strong></div>
-    <span class="flight-state">${escapeHtml(flight.status)}</span>
+    <span class="flight-state">${escapeHtml(status)}</span>
   </article>`;
 }
 
@@ -225,30 +238,51 @@ function initFlightBoards() {
   const fullBoard = document.getElementById("weekly-flights-list");
   const homeBoard = document.getElementById("home-board");
   if (!fullBoard && !homeBoard) return;
-  fetchWeeklyFlights().then((flights) => {
-    if (homeBoard) renderBoard(homeBoard, flights.filter((flight) => flight.scheduledTs > Date.now()).slice(0, 4));
+  const search = document.getElementById("flight-search");
+  const count = document.getElementById("board-status");
+  const activeAirline = { value: "all" };
+  let flights = [];
+
+  const update = () => {
+    if (homeBoard) {
+      const upcoming = flights.filter((flight) => flight.scheduledTs > Date.now()).slice(0, 4);
+      renderBoard(homeBoard, upcoming, "No flights are scheduled on the live FIDS board yet.");
+    }
     if (!fullBoard) return;
-    const search = document.getElementById("flight-search");
-    const count = document.getElementById("board-status");
-    const activeAirline = { value: "all" };
-    const update = () => {
-      const query = (search?.value || "").trim().toLowerCase();
-      const visible = flights.filter((flight) => {
-        const airlineCode = String(flight.flightNumber).slice(0, 2).toUpperCase();
-        const matchesAirline = activeAirline.value === "all" || (activeAirline.value === "other" ? airlineCode !== "EK" && airlineCode !== "FZ" : airlineCode === activeAirline.value);
-        return matchesAirline && (!query || `${flight.flightNumber} ${flight.destination} ${flight.aircraft} ${flight.status}`.toLowerCase().includes(query));
-      });
+    const query = (search?.value || "").trim().toLowerCase();
+    const visible = flights.filter((flight) => {
+      const airlineCode = String(flight.flightNumber).slice(0, 2).toUpperCase();
+      const matchesAirline = activeAirline.value === "all" || (activeAirline.value === "other" ? airlineCode !== "EK" && airlineCode !== "FZ" : airlineCode === activeAirline.value);
+      const status = liveStatus(flight);
+      return matchesAirline && (!query || `${flight.flightNumber} ${flight.destination} ${flight.aircraft} ${status} ${flight.type}`.toLowerCase().includes(query));
+    });
+    if (!flights.length) {
+      renderBoard(fullBoard, [], "The live FIDS board has no flights right now — check back soon.");
+    } else {
       renderBoard(fullBoard, visible);
-      if (count) count.textContent = `${visible.length} ${visible.length === 1 ? "flight" : "flights"} listed · Updated just now`;
-    };
-    search?.addEventListener("input", update);
-    document.querySelectorAll("[data-airline]").forEach((button) => button.addEventListener("click", () => {
-      activeAirline.value = button.dataset.airline;
-      document.querySelectorAll("[data-airline]").forEach((item) => item.classList.toggle("is-active", item === button));
-      update();
-    }));
+    }
+    if (count) count.textContent = `${visible.length} ${visible.length === 1 ? "flight" : "flights"} listed · Updated just now`;
+  };
+
+  const load = async () => {
+    try {
+      flights = await fetchWeeklyFlights();
+    } catch (error) {
+      console.warn("Flight board unavailable:", error.message);
+      flights = [];
+    }
     update();
-  });
+  };
+
+  search?.addEventListener("input", update);
+  document.querySelectorAll("[data-airline]").forEach((button) => button.addEventListener("click", () => {
+    activeAirline.value = button.dataset.airline;
+    document.querySelectorAll("[data-airline]").forEach((item) => item.classList.toggle("is-active", item === button));
+    update();
+  }));
+  load();
+  // Keep pace with the FIDS board, which refreshes its data every minute.
+  window.setInterval(load, 60000);
 }
 
 function initRouteSearch() {
