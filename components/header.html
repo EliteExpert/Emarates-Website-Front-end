@@ -1,26 +1,20 @@
-<header>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="index.html" class="brand" aria-label="Emirates PTFS home">
-                    <img class="brand-tail" src="assets/emirates-tail.png" alt="Emirates PTFS tail fin logo">
-                    <span class="emirates-wordmark">EMIRATES <small>PTFS</small></span>
-                </a>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
-                <li class="nav-item"><a href="classes.html" class="nav-link">Classes</a></li>
-                <li class="nav-item"><a href="booking.html" class="nav-link">Weekly Flights</a></li>
-                <li class="nav-item"><a href="ife.html" class="nav-link">Emarates IFE</a></li>
-                <li class="nav-item"><a href="careers.html" class="nav-link">Careers</a></li>
-                <li class="nav-item"><a href="join.html" class="nav-link">Join Us</a></li>
-                <li class="nav-item"><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button></li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </div>
-    </nav>
+<header class="site-header" data-header>
+    <div class="shell site-nav">
+        <a class="site-brand" href="index.html" aria-label="Emirates PTFS home">
+            <img src="assets/emirates-tail.png" alt="">
+            <span><strong>Emirates</strong><small>PTFS</small></span>
+        </a>
+        <div class="site-meta">DXB <span>·</span> UTC +4</div>
+        <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span></button>
+        <nav class="site-nav-links" aria-label="Primary navigation">
+            <a href="booking.html" data-nav="booking.html">Flight board</a>
+            <a href="classes.html" data-nav="classes.html">Cabins</a>
+            <a href="ife.html" data-nav="ife.html">On board</a>
+            <a href="about.html" data-nav="about.html">About us</a>
+            <a href="careers.html" data-nav="careers.html">Careers</a>
+            <a href="https://discord.gg/PJVAvbJbdn" class="nav-join" target="_blank" rel="noopener">Join the community <span aria-hidden="true">↗</span></a>
+            <button class="auth-button" type="button" data-discord-auth>Sign in</button>
+        </nav>
+    </div>
 </header>
+

@@ -1,208 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#d71921">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Flight Classes - Emirates PTFS</title>
-    <script>document.documentElement.dataset.theme = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');</script>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore Emirates PTFS cabin experiences."><title>Cabins · Emirates PTFS</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <!-- Header -->
-    <div id="header"></div>
-
-    <!-- Page Header -->
-    <section class="page-header">
-        <div class="container">
-            <div>
-                <p class="eyebrow">On board</p>
-                <h1>Flight Classes</h1>
-                <p class="intro">Choose from our premium flight experiences.</p>
-            </div>
-            <div class="flip-clock" id="live-clock" aria-label="Current GMT time" role="timer"></div>
-        </div>
+<body data-page="classes">
+  <div id="header"></div>
+  <main class="interior-main">
+    <section class="interior-hero" style="background:url('assets/photos/fleet-golden-fuselage.png') center/cover">
+      <div class="shell"><p class="eyebrow">On board / Choose your way</p><h1>Make room<br>for more.</h1><p>Three cabin experiences, one standard: arrive feeling like you have been somewhere.</p></div>
     </section>
-    <div class="container">
-        <div class="page-banner" style="background-image: url('assets/photos/fleet-gate-a350.png');">
-            <span class="page-banner-caption">The A350 at the gate</span>
+    <section class="interior-section paper">
+      <div class="shell">
+        <p class="eyebrow">The cabins</p><h2 class="interior-title">Your seat,<br>your altitude.</h2><p class="interior-lead">Whether you are here for the view, the quiet or the celebration, choose the cabin that makes the route yours.</p>
+        <div class="cabin-grid">
+          <article class="cabin-card cabin-economy"><span class="cabin-number">01 / ECONOMY</span><h2>See more<br>of the world.</h2><p>Comfortable and affordable travel experience with standard amenities.</p><ul><li>Standard seating</li><li>Complimentary meals</li><li>Entertainment system</li><li>Wi-Fi access</li><li>Standard baggage allowance</li></ul><div class="cabin-price">From R$0</div><a class="button button-ghost" href="booking.html">View weekly flights <span>↗</span></a></article>
+          <article class="cabin-card cabin-business featured"><span class="cabin-number">02 / BUSINESS</span><h2>Take the<br>long way home.</h2><p>Enhanced comfort with premium services and priority handling.</p><ul><li>Priority boarding</li><li>Luxury seating</li><li>Premium dining</li><li>Extra baggage</li><li>Lounge access</li></ul><div class="cabin-price">From R$45</div><a class="button button-red" href="https://www.roblox.com/game-pass/1240285507/Business-Class" target="_blank" rel="noopener">Book now <span>↗</span></a></article>
+          <article class="cabin-card cabin-first"><span class="cabin-number">03 / FIRST</span><h2>The quiet<br>above it all.</h2><p>The ultimate luxury experience with personalized service.</p><ul><li>Private suite</li><li>Gourmet dining</li><li>Personal attendant</li><li>Luxury amenities</li><li>Chauffeur service</li></ul><div class="cabin-price">From R$60</div><a class="button button-ghost" href="https://www.roblox.com/game-pass/1240509110/First-Class" target="_blank" rel="noopener">Book now <span>↗</span></a></article>
         </div>
-    </div>
-
-
-    <!-- Classes Section -->
-    <section class="classes-section">
-        <div class="container">
-            <div class="classes-container">
-                <div class="class-card">
-                    <div class="class-icon">
-                        <i class="fas fa-plane"></i>
-                    </div>
-                    <h3>Economy Class</h3>
-                    <p>Comfortable and affordable travel experience with standard amenities.</p>
-                    <ul class="class-features">
-                        <li>Standard seating</li>
-                        <li>Complimentary meals</li>
-                        <li>Entertainment system</li>
-                        <li>Wi-Fi access</li>
-                        <li>Standard baggage allowance</li>
-                    </ul>
-                    <div class="class-price">From R$0</div>
-                    <a href="booking.html" class="btn outline">View Weekly Flights</a>
-                </div>
-                
-                <div class="class-card">
-                    <div class="class-icon">
-                        <i class="fas fa-plane-up"></i>
-                    </div>
-                    <h3>Business Class</h3>
-                    <p>Enhanced comfort with premium services and priority handling.</p>
-                    <ul class="class-features">
-                        <li>Priority boarding</li>
-                        <li>Luxury seating</li>
-                        <li>Premium dining</li>
-                        <li>Extra baggage</li>
-                        <li>Lounge access</li>
-                    </ul>
-                    <div class="class-price">From R$45</div>
-                    <a href="https://www.roblox.com/game-pass/1240285507/Business-Class" class="btn outline">Book Now</a>
-                </div>
-                
-                <div class="class-card">
-                    <div class="class-icon">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <h3>First Class</h3>
-                    <p>The ultimate luxury experience with personalized service.</p>
-                    <ul class="class-features">
-                        <li>Private suite</li>
-                        <li>Gourmet dining</li>
-                        <li>Personal attendant</li>
-                        <li>Luxury amenities</li>
-                        <li>Chauffeur service</li>
-                    </ul>
-                    <div class="class-price">From R$60</div>
-                    <a href="https://www.roblox.com/game-pass/1240509110/First-Class" class="btn outline">Book Now</a>
-                </div>
-                
-                <div class="class-card">
-                    <div class="class-icon">
-                        <i class="fas fa-helicopter"></i>
-                    </div>
-                    <h3>Private Charter</h3>
-                    <p>Exclusive private flights tailored to your schedule and destination.</p>
-                    <ul class="class-features">
-                        <li>Custom schedule</li>
-                        <li>Private aircraft</li>
-                        <li>VIP treatment</li>
-                        <li>Flexible routes</li>
-                        <li>Personalized service</li>
-                    </ul>
-                    <div class="class-price">From R$150</div>
-                    <a href="https://www.roblox.com/game-pass/1240235507/Charter-Flight" class="btn outline">Book Now</a>
-                </div>
-            </div>
-        </div>
+      </div>
     </section>
-
-    <!-- Comparison Section -->
-    <section class="comparison-section">
-        <div class="container">
-            <h2 class="section-title">Class Comparison</h2>
-            <div class="comparison-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Feature</th>
-                            <th>Economy</th>
-                            <th>Business</th>
-                            <th>First Class</th>
-                            <th>Private Charter</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Seat Type</td>
-                            <td>Standard</td>
-                            <td>Lie-flat</td>
-                            <td>Private Suite</td>
-                            <td>Custom</td>
-                        </tr>
-                        <tr>
-                            <td>Baggage Allowance</td>
-                            <td>1 Checked + 1 Carry-on</td>
-                            <td>2 Checked + 2 Carry-on</td>
-                            <td>3 Checked + 2 Carry-on</td>
-                            <td>Custom</td>
-                        </tr>
-                        <tr>
-                            <td>Priority Boarding</td>
-                            <td><i class="fas fa-times"></i></td>
-                            <td><i class="fas fa-check"></i></td>
-                            <td><i class="fas fa-check"></i></td>
-                            <td><i class="fas fa-check"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Lounge Access</td>
-                            <td><i class="fas fa-times"></i></td>
-                            <td><i class="fas fa-check"></i></td>
-                            <td><i class="fas fa-check"></i></td>
-                            <td><i class="fas fa-check"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Dining</td>
-                            <td>Standard</td>
-                            <td>Premium</td>
-                            <td>Gourmet</td>
-                            <td>Custom</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <section class="interior-section white">
+      <div class="shell"><p class="eyebrow">At a glance</p><h2 class="interior-title">One route.<br>Three points of view.</h2>
+        <div class="compare-table"><table><thead><tr><th>Experience</th><th>Economy</th><th>Business</th><th>First</th></tr></thead><tbody><tr><td>Community events</td><td>Included</td><td>Included</td><td>Included</td></tr><tr><td>Priority handling</td><td>—</td><td>Included</td><td>Included</td></tr><tr><td>Dining</td><td>Route menu</td><td>Premium menu</td><td>On request</td></tr><tr><td>Best for</td><td>Every route</td><td>Long haul</td><td>Special occasions</td></tr></tbody></table></div>
+      </div>
     </section>
-
-    <!-- Footer -->
-    <div id="footer"></div>
-
-    <script src="script.js"></script>
-<script>
-    // Load header and footer components
-    document.addEventListener('DOMContentLoaded', function() {
-        // Load header if element exists
-        const headerElement = document.getElementById('header');
-        if (headerElement) {
-            fetch('components/header.html')
-                .then(response => response.text())
-                .then(data => {
-                    headerElement.innerHTML = data;
-                    // Re-initialize components after loading
-                    reinitComponents();
-                })
-                .catch(error => {
-                    console.error('Error loading header:', error);
-                });
-        }
-        
-        // Load footer if element exists
-        const footerElement = document.getElementById('footer');
-        if (footerElement) {
-            fetch('components/footer.html')
-                .then(response => response.text())
-                .then(data => {
-                    footerElement.innerHTML = data;
-                    // Re-initialize modal after loading
-                    initModal();
-                })
-                .catch(error => {
-                    console.error('Error loading footer:', error);
-                });
-        }
-    });
-</script>
+  </main>
+  <div id="footer"></div><script src="script.js"></script>
 </body>
 </html>
+

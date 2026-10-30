@@ -1,229 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#d71921">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="Emirates PTFS — a premium flight simulation community. Fly real routes, join weekly scheduled flights, and climb the Skywards tiers.">
-    <title>Emirates PTFS - Premium Flight Experience</title>
-    <script>document.documentElement.dataset.theme = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');</script>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c1822">
+  <meta name="description" content="Emirates PTFS — a premium flight community built around real routes, real people and the joy of flying together.">
+  <title>Emirates PTFS · Fly Better</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <!-- Header -->
-    <div id="header"></div>
-
-    <!-- FIDS-style Hero -->
-    <section class="home-section">
-        <div class="container">
-            <div class="home-content">
-                <p class="hero-eyebrow">Dubai · UAE</p>
-                <h1 class="home-title">Emirates PTFS</h1>
-                <p class="home-subtitle">Experience Premium Flight Simulation</p>
-                <p class="home-description">Join thousands of aviation enthusiasts in our realistic flight simulation community</p>
-                <div class="home-buttons">
-                    <a href="booking.html" class="btn primary large"><i class="fas fa-calendar-week"></i> Weekly Flights</a>
-                    <a href="https://discord.gg/PJVAvbJbdn" target="_blank" rel="noopener" class="btn secondary large"><i class="fab fa-discord"></i> Join Community</a>
-                </div>
-                <div class="hero-live">
-                    <div class="hero-pill">
-                        <span class="live-dot"></span>
-                        <strong id="hero-member-count">—</strong> members in the server
-                    </div>
-                    <div class="hero-pill">
-                        <i class="fas fa-plane-departure"></i>
-                        <strong id="hero-flight-count">—</strong> flights scheduled
-                    </div>
-                </div>
-                <div class="home-hero-clock">
-                    <div class="flip-clock" id="live-clock" aria-label="Current GMT time" role="timer"></div>
-                </div>
-            </div>
+<body class="home-page" data-page="home">
+  <div id="header"></div>
+  <main>
+    <section class="hero" aria-label="Emirates PTFS introduction">
+      <div class="hero-image" aria-hidden="true"></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <p class="hero-kicker">Dubai · UAE / Fly better</p>
+          <h1>Fly<br><em>better.</em></h1>
+          <p class="hero-intro">Fly Emirates, Fly Better.</p>
+          <p class="hero-support">A considered PTFS community for pilots who care about the route, the rhythm and the people in the cabin.</p>
+          <div class="hero-actions">
+            <a class="button button-red" href="booking.html">Explore the flight board <span aria-hidden="true">↗</span></a>
+            <a class="button button-ghost" href="https://discord.gg/PJVAvbJbdn" target="_blank" rel="noopener">Join the community</a>
+          </div>
         </div>
-        <a href="#upcoming" class="scroll-cue" aria-label="Scroll to this week's flights">
-            <i class="fas fa-chevron-down"></i>
-        </a>
+      </div>
+      <a class="scroll-cue" href="#upcoming" aria-label="Scroll to flight operations">↓</a>
     </section>
 
-    <!-- This Week in the Air -->
-    <section class="features-section home-preview" id="upcoming">
-        <div class="container">
-            <h2 class="section-title reveal">This Week in the Air</h2>
-            <p class="section-subtitle reveal">Live from flight operations — the next departures on the schedule</p>
-            <div class="status-container home-preview-container reveal" id="home-flights-preview">
-                <div class="flights-loading">
-                    <i class="fas fa-circle-notch fa-spin"></i>
-                    <p>Fetching this week's schedule…</p>
-                </div>
-            </div>
-            <div class="home-preview-actions reveal">
-                <a href="booking.html" class="btn outline large">View the Full Weekly Schedule <i class="fas fa-arrow-right"></i></a>
-            </div>
+    <section class="home-section paper" id="upcoming">
+      <div class="shell">
+        <div class="section-head" data-reveal>
+          <div><p class="eyebrow">Flight operations / This week</p><h2>Next departures.</h2></div>
+          <p>Know where we are going next. The board refreshes from our live operations schedule.</p>
         </div>
+        <div class="route-list" id="home-board" data-reveal><div class="empty-board">Loading the flight board…</div></div>
+        <div class="route-more"><a class="text-link" href="booking.html">View the full schedule <span>↗</span></a></div>
+      </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features-section" style="background: var(--light);">
-        <div class="container">
-            <h2 class="section-title reveal">Why Choose Emirates PTFS?</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-plane"></i>
-                    </div>
-                    <h3>Realistic Simulation</h3>
-                    <p>Experience authentic flight simulation with realistic roleplay procedures.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3>Active Community</h3>
-                    <p>Join thousands of pilots and aviation enthusiasts in our thriving Discord community.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-globe"></i>
-                    </div>
-                    <h3>Global Network</h3>
-                    <p>Fly to destinations worldwide with our extensive virtual airline network.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <h3>24/7 Support</h3>
-                    <p>Get help from our dedicated team of staff and experienced community members.</p>
-                </div>
-            </div>
-        </div>
+    <section class="editorial">
+      <div class="editorial-copy" data-reveal>
+        <p class="eyebrow">The way we fly</p>
+        <h2>It’s how you get there.</h2>
+        <p>From the first briefing to the final approach, Emirates PTFS is built around the details that make a flight feel like an occasion — clear routes, good company and room to look out.</p>
+        <a class="text-link" href="classes.html">Discover the cabins <span>↗</span></a>
+      </div>
+      <div class="editorial-media" role="img" aria-label="Emirates aircraft in warm golden light"><div class="editorial-caption"><strong>Every sector has a story.</strong><span>Emirates / 1985 — Dubai</span></div></div>
     </section>
 
-    <!-- Fleet Video Band -->
-    <section class="fleet-video-section">
-        <div class="container">
-            <div class="fleet-video-frame reveal">
-                <video autoplay muted loop playsinline id="bg-video" poster="assets/photos/fleet-takeoff-day.png">
-                    <source src="https://assets.mixkit.co/videos/preview/mixkit-airplane-flying-in-the-sky-42937-large.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-                <span class="fleet-video-caption">Fly the real routes</span>
-            </div>
+    <section class="home-section paper">
+      <div class="shell">
+        <div class="section-head" data-reveal>
+          <div><p class="eyebrow">Departures / From DXB</p><h2>Go where the light is.</h2></div>
+          <a class="text-link" href="booking.html">All destinations <span>↗</span></a>
         </div>
+        <div class="destination-grid" data-reveal>
+          <figure class="destination-card"><img src="assets/photos/fleet-tokyo-airport.png" alt="Aircraft at Tokyo airport"><figcaption><span>EK 318 · 09h 35m</span><strong>Tokyo</strong><small>Neon nights, quiet mornings.</small></figcaption></figure>
+          <figure class="destination-card"><img src="assets/photos/fleet-moon-night.png" alt="Aircraft flying through the night"><figcaption><span>EK 004 · 07h 25m</span><strong>London</strong><small>The city after dark.</small></figcaption></figure>
+          <figure class="destination-card"><img src="assets/photos/fleet-gate-a350.png" alt="Emirates aircraft at the gate"><figcaption><span>EK 501 · 03h 15m</span><strong>Mumbai</strong><small>A short hop south.</small></figcaption></figure>
+        </div>
+      </div>
     </section>
 
-    <!-- Fleet Gallery -->
-    <section class="gallery-section">
-        <div class="container">
-            <h2 class="section-title reveal">From the Flight Deck</h2>
-            <p class="section-subtitle reveal">Moments from our operations, captured by the crew</p>
-            <div class="gallery-grid" id="gallery-grid" aria-live="polite"></div>
-
-            <div class="gallery-tool reveal" id="gallery-tool">
-                <div class="gallery-tool-body">
-                    <h3>Add a photo to the gallery</h3>
-                    <p>Flew something memorable? Add your shot — pick the photo, tag it with the flight number, and it joins the board.</p>
-                    <form id="gallery-form">
-                        <label class="gallery-file">
-                            <input type="file" id="gallery-file" accept="image/*" required>
-                            <span id="gallery-file-label"><i class="fas fa-image"></i> Choose a photo</span>
-                        </label>
-                        <input type="text" id="gallery-flight" placeholder="Flight number (e.g. EK247)" maxlength="24">
-                        <button type="submit" class="btn primary">Add to Gallery</button>
-                    </form>
-                    <p class="gallery-tool-note">Photos you add are kept in this browser and appear first in the rotation.</p>
-                </div>
-            </div>
-        </div>
+    <section class="manifesto-band">
+      <div class="shell manifesto" style="padding:0;background:transparent"><span class="manifesto-number">02 / 04 · THE EMIRATES EXPERIENCE</span><h2>Travel isn’t just about the <em>destination.</em></h2></div>
     </section>
-
-    <!-- Destination Marquee -->
-    <section class="marquee-section" aria-hidden="true">
-        <div class="marquee-track" id="marquee-track">
-            <span class="marquee-item"><strong>DXB</strong> Dubai</span>
-            <span class="marquee-item"><strong>JFK</strong> New York</span>
-            <span class="marquee-item"><strong>LHR</strong> London</span>
-            <span class="marquee-item"><strong>CDG</strong> Paris</span>
-            <span class="marquee-item"><strong>SIN</strong> Singapore</span>
-            <span class="marquee-item"><strong>SYD</strong> Sydney</span>
-            <span class="marquee-item"><strong>NRT</strong> Tokyo</span>
-            <span class="marquee-item"><strong>JNB</strong> Johannesburg</span>
-            <span class="marquee-item"><strong>GRU</strong> São Paulo</span>
-            <span class="marquee-item"><strong>LAX</strong> Los Angeles</span>
-            <span class="marquee-item"><strong>BKK</strong> Bangkok</span>
-            <span class="marquee-item"><strong>HKG</strong> Hong Kong</span>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats-section">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat reveal">
-                    <div class="stat-number" id="crew-count">—</div>
-                    <div class="stat-label">Crew Members</div>
-                </div>
-                <div class="stat reveal">
-                    <div class="stat-number" data-count="40" data-suffix="+">40+</div>
-                    <div class="stat-label">Flights Completed</div>
-                </div>
-                <div class="stat reveal">
-                    <div class="stat-number" data-count="150" data-suffix="+">150+</div>
-                    <div class="stat-label">Destinations</div>
-                </div>
-                <div class="stat reveal">
-                    <div class="stat-number">24/7</div>
-                    <div class="stat-label">Operations</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Band -->
-    <section class="cta-section">
-        <div class="container">
-            <h2 class="reveal">Ready for Departure?</h2>
-            <p class="reveal">Cabin crew, prepare for boarding. Your seat in the community is waiting.</p>
-            <div class="home-buttons reveal">
-                <a href="https://discord.gg/PJVAvbJbdn" target="_blank" rel="noopener" class="btn primary large"><i class="fab fa-discord"></i> Join Our Discord</a>
-                <a href="join.html" class="btn secondary large">Learn More</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <div id="footer"></div>
-
-    <script src="script.js"></script>
-<script>
-    // Load header and footer components
-    document.addEventListener('DOMContentLoaded', function() {
-        const headerElement = document.getElementById('header');
-        if (headerElement) {
-            fetch('components/header.html')
-                .then(response => response.text())
-                .then(data => {
-                    headerElement.innerHTML = data;
-                    reinitComponents();
-                })
-                .catch(error => console.error('Error loading header:', error));
-        }
-
-        const footerElement = document.getElementById('footer');
-        if (footerElement) {
-            fetch('components/footer.html')
-                .then(response => response.text())
-                .then(data => {
-                    footerElement.innerHTML = data;
-                    initModal();
-                })
-                .catch(error => console.error('Error loading footer:', error));
-        }
-    });
-</script>
+  </main>
+  <div id="footer"></div>
+  <script src="script.js"></script>
 </body>
 </html>
+

@@ -212,7 +212,7 @@ function iceWelcomeView(active, user) {
             <div class="ice-side-empty">
                 <i class="fas fa-user-lock"></i>
                 <p>Log in with Discord to use the ICE system.</p>
-                <a class="ice-mini-btn" href="index.html#gallery-tool">How to log in</a>
+                <a class="ice-mini-btn" href="https://discord.gg/PJVAvbJbdn" target="_blank" rel="noopener">Join Discord</a>
             </div>`;
     } else if (!active) {
         const next = ifeNextFlight();
@@ -535,3 +535,4 @@ async function initIfe() {
 }
 
 initIfe();
+
