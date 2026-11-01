@@ -13,7 +13,13 @@
             <a href="about.html" data-nav="about.html">About us</a>
             <a href="careers.html" data-nav="careers.html">Careers</a>
             <a href="https://discord.gg/PJVAvbJbdn" class="nav-join" target="_blank" rel="noopener">Join the community <span aria-hidden="true">↗</span></a>
-            <button class="auth-button" type="button" data-discord-auth>Sign in</button>
+            <div class="auth-menu" data-auth-menu>
+                <button class="auth-button" type="button" data-discord-auth aria-expanded="false">Sign in</button>
+                <div class="auth-dropdown" role="menu">
+                    <a href="profile.html" role="menuitem">Your profile</a>
+                    <button type="button" role="menuitem" data-auth-signout>Sign out</button>
+                </div>
+            </div>
         </nav>
     </div>
 </header>

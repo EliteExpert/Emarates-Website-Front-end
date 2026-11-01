@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Your Emirates PTFS Skywards profile — miles balance, tier status and recent flights."><title>Your profile · Emirates PTFS</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="profile">
+  <div id="header"></div>
+  <main class="interior-main">
+    <section class="interior-hero" style="background:url('assets/photos/fleet-tail-fin.png') center/cover">
+      <div class="shell"><p class="eyebrow">Skywards · Your journey</p><h1>Your profile.</h1><p>Your miles, your tier and every sector you have flown with the operation.</p></div>
+    </section>
+    <section class="interior-section paper">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">Skywards membership</p><h2>Your miles.</h2></div><p>Earn miles for every departure you fly from Dubai, and watch your tier climb from Blue to Platinum.</p></div>
+
+        <div class="board-panel profile-panel" id="profile-panel">
+          <div class="profile-error" id="profile-error" hidden></div>
+          <div class="empty-board" id="profile-gate">
+            <p><strong>Sign in with Discord</strong> to see your miles and Skywards tier.</p>
+            <p class="profile-gate-note">Your membership is created automatically the first time you view your profile.</p>
+            <button class="button button-red" type="button" data-discord-auth>Sign in</button>
+          </div>
+
+          <div class="profile-view" id="profile-view" hidden>
+            <div class="profile-card">
+              <img class="profile-avatar" id="profile-avatar" alt="" hidden>
+              <div class="profile-identity">
+                <h3 id="profile-name">Member</h3>
+                <p class="profile-tier-line">Skywards <strong id="profile-tier-name">Blue</strong> member<span id="profile-skywards-number"></span></p>
+                <p class="profile-tier-bonus" id="profile-tier-bonus"></p>
+              </div>
+              <div class="profile-miles"><small>Miles earned</small><strong id="profile-miles">0</strong></div>
+            </div>
+            <div class="tier-progress" id="tier-progress">
+              <div class="tier-track"><div class="tier-fill" id="tier-fill"></div></div>
+              <p class="tier-note" id="tier-note"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-columns">
+          <div class="board-panel">
+            <div class="section-head"><div><p class="eyebrow">Earn miles</p><h2>Flown recently?</h2></div></div>
+            <p class="profile-hint">Click <strong>Interested</strong> on a flight's Discord event before departure — after it lands, claim it here. Flights without a matching Discord event can't be verified.</p>
+            <div id="claim-list" class="claim-list"><div class="empty-board">Loading departed flights…</div></div>
+          </div>
+          <div class="board-panel">
+            <div class="section-head"><div><p class="eyebrow">Activity</p><h2>Recent miles.</h2></div></div>
+            <div id="ledger-list" class="ledger-list"><div class="empty-board">Sign in to see your activity.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="footer"></div><script src="script.js"></script><script src="profile.js"></script>
+</body>
+</html>

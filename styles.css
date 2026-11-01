@@ -28,6 +28,7 @@ body.nav-open { overflow: hidden; }
 a { color: inherit; text-decoration: none; }
 button, input, select { font: inherit; }
 img { display: block; max-width: 100%; }
+[hidden] { display: none !important; }
 .shell { width: min(1280px, calc(100% - 72px)); margin: 0 auto; }
 .eyebrow { color: var(--ink); font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
 .muted { color: var(--muted); }
@@ -64,6 +65,12 @@ button:disabled:hover { box-shadow: none; }
 .auth-button:hover { border-color: transparent; background: var(--red); color: #fff; }
 .auth-button.is-signed-in { display: inline-flex; align-items: center; gap: 7px; border-color: transparent; color: #fff; }
 .auth-avatar { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+.auth-menu { position: relative; }
+.auth-dropdown { position: absolute; top: calc(100% + 8px); right: 0; min-width: 176px; padding: 6px; border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: 0 18px 38px rgba(5, 11, 16, .18); opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity .18s ease, transform .18s ease, visibility .18s; z-index: 60; }
+.auth-menu.is-signed-in:hover .auth-dropdown, .auth-menu.is-open .auth-dropdown { opacity: 1; visibility: visible; transform: none; }
+.auth-dropdown a, .auth-dropdown button { display: block; width: 100%; padding: 11px 12px; border: 0; border-radius: 7px; background: none; color: var(--ink); cursor: pointer; font-family: var(--sans); font-size: 12px; font-weight: 700; text-align: left; }
+.auth-dropdown a:hover, .auth-dropdown button:hover { background: var(--paper); }
+.auth-dropdown button { color: #a33b2e; }
 .nav-toggle { display: none; width: 44px; height: 44px; border: 0; border-radius: 4px; background: var(--red); color: #fff; cursor: pointer; }
 .nav-toggle span { display: block; width: 15px; height: 1px; margin: 4px auto; background: currentColor; transition: transform .2s ease; }
 .nav-toggle.is-open span:first-child { transform: translateY(2.5px) rotate(45deg); }
@@ -190,6 +197,48 @@ button:disabled:hover { box-shadow: none; }
 .flight-state { justify-self: end; padding: 6px 9px; border-radius: 999px; background: #e1f1e5; color: #21713a; font-size: 8px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .empty-board { padding: 42px; text-align: center; color: var(--muted); }
 .board-footnote { display: flex; justify-content: space-between; gap: 18px; margin-top: 18px; color: var(--muted); font-size: 10px; }
+
+/* Skywards profile page */
+.profile-error { margin-bottom: 14px; padding: 12px 16px; border: 1px solid #f2b8b5; border-radius: 10px; background: #fdecea; color: #8c1d18; font-size: 12px; }
+.profile-gate-note { color: var(--muted); font-size: 11px; margin-top: 8px; }
+#profile-gate .button-red { margin-top: 16px; }
+.profile-view { display: flex; flex-direction: column; gap: 18px; }
+.profile-card { display: flex; align-items: center; gap: 20px; }
+.profile-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--line); }
+.profile-identity { flex: 1; min-width: 0; }
+.profile-identity h3 { font-family: var(--serif); font-size: 26px; font-weight: 400; }
+.profile-tier-line { margin-top: 4px; color: var(--muted); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+.tier-blue { color: #3f5e7d; }
+.tier-silver { color: #71797f; }
+.tier-gold { color: #a8821f; }
+.tier-platinum { color: #4f7d7a; }
+.profile-miles { text-align: right; }
+.profile-miles small { display: block; color: var(--muted); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+.profile-miles strong { font-family: var(--serif); font-size: 40px; font-weight: 400; }
+.tier-track { height: 8px; border-radius: 999px; background: #e9e4da; overflow: hidden; }
+.tier-fill { height: 100%; width: 0; border-radius: 999px; background: var(--red); transition: width .6s ease; }
+.tier-note { margin-top: 8px; color: var(--muted); font-size: 11px; }
+.profile-columns { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; margin-top: 18px; }
+.profile-hint { margin-top: 10px; color: var(--muted); font-size: 12px; }
+.claim-list, .ledger-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.claim-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.claim-route { min-width: 0; }
+.claim-route strong { display: block; font-size: 13px; }
+.claim-route small { color: var(--muted); font-size: 10px; }
+.claim-button { flex-shrink: 0; padding: 9px 14px; font-size: 11px; }
+.claim-button:disabled { opacity: .75; cursor: default; }
+.claim-button.is-claimed { background: #e1f1e5; color: #21713a; }
+.claim-button.claim-blocked { background: #e9e4da; color: var(--muted); }
+.claim-event { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+.ledger-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.ledger-reason { min-width: 0; }
+.ledger-reason strong { display: block; font-size: 13px; }
+.ledger-reason small { color: var(--muted); font-size: 10px; }
+.ledger-miles { flex-shrink: 0; font-weight: 700; color: #21713a; font-size: 13px; }
+.ledger-miles.ledger-debit { color: #a33b2e; }
+.profile-tier-line #profile-skywards-number { margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--line); letter-spacing: .08em; }
+.profile-tier-bonus { margin-top: 6px; color: var(--muted); font-size: 11px; }
+.tier-note a { color: var(--red); font-weight: 700; }
 
 /* Cabins */
 .cabin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
@@ -350,7 +399,9 @@ button:disabled:hover { box-shadow: none; }
   .site-nav-links.is-open { display: flex; }
   .site-nav-links a { padding: 15px 5px; border-bottom: 1px solid var(--line); }
   .site-nav-links .nav-join { justify-content: center; margin-top: 12px; border-bottom: 0; }
+  .auth-menu { width: 100%; }
   .auth-button { width: 100%; margin-top: 12px; }
+  .auth-dropdown { left: 0; right: 0; }
   .hero { min-height: 0; margin: 0; border-radius: 0 0 21px 21px; padding-bottom: 0; }
   .hero-grid { display: block; min-height: 0; padding-top: 120px; padding-bottom: 74px; }
   .hero-copy { padding: 0; }
@@ -360,6 +411,9 @@ button:disabled:hover { box-shadow: none; }
   .booking-form .field:nth-child(1), .booking-form .field:nth-child(2) { grid-column: span 2; }
   .booking-form .button { grid-column: span 2; }
   .scroll-cue { display: none; }
+  .profile-columns { grid-template-columns: 1fr; }
+  .profile-card { flex-wrap: wrap; }
+  .profile-miles { width: 100%; text-align: left; }
   .home-section { padding: 72px 0; }
   .section-head { display: block; margin-bottom: 28px; }
   .section-head p { margin-top: 18px; }

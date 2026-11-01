@@ -1,5 +1,4 @@
 const FIDS_URL = "https://emirates-ptfs-fids.onrender.com";
-const BACKEND_URL = "https://emarates-website-production.up.railway.app";
 const DISCORD_GUILD_ID = "1294732873143685160";
 const OAUTH_STORE_KEY = "discord-oauth";
 const DISCORD_INVITE = "https://discord.gg/PJVAvbJbdn";
@@ -37,17 +36,28 @@ function discordRedirectUri() { return new URL("index.html", location.href).href
 
 function renderDiscordAuth(user, message = "") {
   document.querySelectorAll("[data-discord-auth]").forEach((button) => {
+    const menu = button.closest("[data-auth-menu]");
     button.classList.toggle("is-signed-in", Boolean(user));
-    button.title = message || (user ? "Sign out of Discord" : "Sign in with Discord");
+    button.title = message || (user ? "" : "Sign in with Discord");
     if (user) {
       const avatar = user.avatar ? `<img class="auth-avatar" src="${escapeHtml(user.avatar)}" alt="">` : "";
       button.innerHTML = `${avatar}<span>${escapeHtml(user.name || "Community member")}</span>`;
-      button.setAttribute("aria-label", "Sign out of Discord");
-      button.onclick = discordLogout;
+      button.setAttribute("aria-label", `${user.name || "Community member"} — account menu`);
+      button.onclick = () => {
+        const open = menu ? menu.classList.toggle("is-open") : false;
+        button.setAttribute("aria-expanded", String(open));
+      };
     } else {
       button.textContent = "Sign in";
       button.setAttribute("aria-label", "Sign in with Discord");
+      button.setAttribute("aria-expanded", "false");
       button.onclick = startDiscordAuth;
+    }
+    if (menu) {
+      menu.classList.toggle("is-signed-in", Boolean(user));
+      if (!user) menu.classList.remove("is-open");
+      const signOut = menu.querySelector("[data-auth-signout]");
+      if (signOut) signOut.onclick = () => { menu.classList.remove("is-open"); discordLogout(); };
     }
   });
   document.querySelectorAll("[data-auth-status]").forEach((element) => { element.textContent = message || (user ? `Signed in as ${user.name}` : "Not signed in"); });
@@ -307,6 +317,11 @@ function initNavigation() {
   const links = document.querySelector(".site-nav-links");
   const current = window.location.pathname.split("/").pop() || "index.html";
   document.querySelectorAll("[data-nav]").forEach((link) => link.classList.toggle("is-active", link.dataset.nav === current));
+  document.addEventListener("click", (event) => {
+    document.querySelectorAll("[data-auth-menu].is-open").forEach((menu) => {
+      if (!menu.contains(event.target)) menu.classList.remove("is-open");
+    });
+  });
   const updateHeader = () => header?.classList.toggle("is-scrolled", window.scrollY > 20);
   updateHeader();
   window.addEventListener("scroll", updateHeader, { passive: true });
