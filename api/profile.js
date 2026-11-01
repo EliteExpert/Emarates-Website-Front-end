@@ -90,6 +90,9 @@ module.exports = async (req, res) => {
     if (error.code === 'DB_NOT_CONFIGURED' || /DATABASE_URL/.test(error.message)) {
       return json(res, 503, { error: 'The miles service is not configured yet.' });
     }
+    if (/ENOTFOUND|ECONNREFUSED|ETIMEDOUT/i.test(error.message) && /railway\.internal/i.test(String(process.env.DATABASE_URL))) {
+      return json(res, 503, { error: 'The database hostname only works inside Railway — set DATABASE_URL to its public TCP proxy URL (DATABASE_PUBLIC_URL).' });
+    }
     console.error('GET /api/profile failed:', error);
     return json(res, 502, { error: 'Could not reach the miles database.' });
   }
