@@ -6,20 +6,19 @@
 //        body: { flightNumber: "EK 410", date: "2026-10-30" }
 //        -> { earned, base, travelClass, miles, tier }
 //
-// Attendance rule: a flight is only claimable if the member clicked
-// "Interested" on the Discord scheduled event for that flight, which the
-// function verifies with the bot token against the Discord API. The event
-// is matched by flight code in the event name/description within 36 hours
-// of the scheduled departure. Miles are the Dubai -> destination distance
-// times the member's travel-class role multiplier and stored tier bonus —
-// the same multiplier chain the Discord bot applies.
+// Attendance rule: each FIDS flight is linked to its Discord scheduled event
+// by staff through the flight's discordEvent field (a discord.com/events/...
+// share URL or a raw event ID). The function verifies the linked event
+// exists in the guild and that the member is on its subscriber list, using
+// the bot token against the Discord API. Miles are the Dubai -> destination
+// distance times the member's travel-class role multiplier and stored tier
+// bonus — the same multiplier chain the Discord bot applies.
 const { getPool, ensureSchema, upsertAccount, tierInfo, TIER_MULTIPLIERS, CLASS_MULTIPLIERS, TRAVEL_CLASS_ROLE_IDS } = require('./db');
 
 const DISCORD_API = process.env.DISCORD_API_BASE || 'https://discord.com/api/v9';
 const DISCORD_BOT_TOKEN = (process.env.DISCORD_BOT_TOKEN || '').trim();
 const DISCORD_GUILD_ID = (process.env.DISCORD_GUILD_ID || '1294732873143685160').trim();
 const FIDS_FLIGHTS_URL = process.env.FIDS_FLIGHTS_URL || 'https://emirates-ptfs-fids.onrender.com/api/flights';
-const MATCH_WINDOW_MS = 36 * 60 * 60 * 1000;
 const DXB = { lat: 25.2532, lon: 55.3657 };
 const DEFAULT_MILES = 1500;
 
@@ -118,23 +117,23 @@ function resolveTravelClass(roleIds) {
   return 'Economy';
 }
 
-function normalizeFlightCode(value) {
-  return String(value || '').replace(/\s+/g, '').toUpperCase();
+// Staff link a FIDS flight to its Discord scheduled event via the flight's
+// discordEvent field — either the share URL (discord.com/events/<guild>/
+// <event>) or a raw event ID.
+function discordEventId(flight) {
+  const raw = String(flight?.discordEvent || '').trim();
+  if (!raw) return null;
+  if (/^\d{1,21}$/.test(raw)) return raw;
+  const fromUrl = raw.match(/events\/\d+\/(\d{1,21})/);
+  if (fromUrl) return fromUrl[1];
+  const trailing = raw.match(/(\d{1,21})\D*$/);
+  return trailing ? trailing[1] : null;
 }
 
-function findMatchingEvent(events, flightNumber, flightTs) {
-  const code = normalizeFlightCode(flightNumber);
-  const candidates = (Array.isArray(events) ? events : [])
-    .filter((event) => {
-      const haystack = `${event.name || ''} ${event.description || ''}`;
-      if (!normalizeFlightCode(haystack).includes(code)) return false;
-      const start = Date.parse(event.scheduled_start_timestamp || '');
-      return !Number.isNaN(start) && Math.abs(start - flightTs) <= MATCH_WINDOW_MS;
-    })
-    .sort((a, b) =>
-      Math.abs(Date.parse(a.scheduled_start_timestamp) - flightTs) -
-      Math.abs(Date.parse(b.scheduled_start_timestamp) - flightTs));
-  return candidates[0] || null;
+function findMatchingEvent(events, flight) {
+  const id = discordEventId(flight);
+  if (!id) return null;
+  return (events || []).find((event) => String(event.id) === id) || null;
 }
 
 function haversineKm(from, to) {
@@ -207,10 +206,10 @@ module.exports = async (req, res) => {
     const flights = departedDepartures(await fetchFidsFlights());
     const scheduledEvents = await fetchScheduledEvents();
 
-    // Match every departed flight to its Discord scheduled event once.
+    // Match every departed flight to its linked Discord scheduled event once.
     const matched = new Map();
     for (const flight of flights) {
-      matched.set(flight, findMatchingEvent(scheduledEvents, flight.flightNumber, flight.scheduledTs));
+      matched.set(flight, findMatchingEvent(scheduledEvents, flight));
     }
 
     if (req.method === 'GET') {
@@ -269,14 +268,14 @@ module.exports = async (req, res) => {
       return json(res, 400, { error: 'A flight number and date (YYYY-MM-DD) are required.' });
     }
     const flight = flights.find((entry) =>
-      normalizeFlightCode(entry.flightNumber) === normalizeFlightCode(flightNumber) && entry.date === flightDate);
+      String(entry.flightNumber || '').trim().toUpperCase() === flightNumber && entry.date === flightDate);
     if (!flight) {
       return json(res, 404, { error: 'That flight is not on the FIDS departures board (or has not departed yet).' });
     }
     const reference = flightReference(flightNumber, flightDate);
-    const event = findMatchingEvent(scheduledEvents, flight.flightNumber, flight.scheduledTs);
+    const event = findMatchingEvent(scheduledEvents, flight);
     if (!event) {
-      return json(res, 404, { error: 'No Discord event is linked to this flight — ask staff to schedule one so attendance can be verified.' });
+      return json(res, 404, { error: 'No Discord event is linked to this flight — staff can link one on the FIDS board.' });
     }
     const { rows: awardedRows } = await getPool().query(
       'SELECT 1 FROM external_event_awards WHERE event_id = $1::bigint LIMIT 1',

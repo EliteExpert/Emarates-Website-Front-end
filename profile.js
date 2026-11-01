@@ -119,7 +119,7 @@ async function loadClaimableFlights() {
         : `<button class="button button-red claim-button" type="button" data-claim-flight="${escapeHtml(flight.flightNumber)}" data-claim-date="${escapeHtml(flight.date)}">Claim +${formatMiles(flight.estimatedMiles)} miles</button>`;
       const eventLine = flight.event
         ? `<small class="claim-event">Discord event: ${escapeHtml(flight.event.name)}</small>`
-        : '<small class="claim-event">No matching Discord event — attendance cannot be verified.</small>';
+        : '<small class="claim-event">No Discord event linked — staff can link one on the FIDS board.</small>';
       return `
       <div class="claim-row">
         <div class="claim-route"><strong>${escapeHtml(flight.flightNumber)}</strong><small>${escapeHtml(flight.date)} · ${escapeHtml(String(flight.departureTime))} UTC · Dubai → ${escapeHtml(destination)}</small>${eventLine}</div>
