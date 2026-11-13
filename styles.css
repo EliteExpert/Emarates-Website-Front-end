@@ -1193,6 +1193,20 @@ body.ife-page header { background: var(--white); }
 .ice-btn-i { background: linear-gradient(180deg, #96e08e 0%, #4fbb58 55%, #2f9040 100%); }
 .ice-btn-c { background: linear-gradient(180deg, #f79ad2 0%, #d455a8 55%, #b23a8c 100%); }
 .ice-btn-e { background: linear-gradient(180deg, #8ba4f9 0%, #5470e0 55%, #3550bd 100%); }
+
+/* Disabled ICE buttons stay colored — only the cursor changes */
+.ice-btn:disabled,
+.ice-btn:disabled:hover {
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+  opacity: 1;
+  color: #fff;
+}
+.ice-btn-i:disabled { background: linear-gradient(180deg, #96e08e 0%, #4fbb58 55%, #2f9040 100%); }
+.ice-btn-c:disabled { background: linear-gradient(180deg, #f79ad2 0%, #d455a8 55%, #b23a8c 100%); }
+.ice-btn-e:disabled { background: linear-gradient(180deg, #8ba4f9 0%, #5470e0 55%, #3550bd 100%); }
+.ice-btn:disabled span { text-shadow: none; }
 .ice-btn-wrap > em {
   font-style: normal; font-family: Arial, Helvetica, sans-serif;
   font-size: .78em; color: #fff; white-space: nowrap;
@@ -1309,6 +1323,7 @@ body.ife-page header { background: var(--white); }
   min-height: 8em;
   background: #fff; border: 1px solid #e2e4e7;
   border-radius: .8em; padding: .9em 1em;
+  margin-left: 2em; max-width: 560px;
 }
 .ice-quiz-step {
   display: block; color: #74777d; font-size: .74em; font-weight: 700;
@@ -1351,7 +1366,7 @@ body.ife-page header { background: var(--white); }
   color: #74777d; white-space: nowrap;
 }
 /* Dining menu (Communication tab) */
-.ice-menu { display: grid; gap: .9rem; justify-items: start; padding-left: .6em; }
+.ice-menu { display: grid; gap: .9rem; justify-items: start; padding-left: 2em; }
 .ice-menu .ice-course {
   width: 100%; max-width: 420px;
   border: 1px solid #e2e4e7; border-radius: .8em;
