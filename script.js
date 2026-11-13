@@ -657,6 +657,7 @@ async function fetchDiscordProfile(token) {
 }
 
 async function initDiscordAuth() {
+    window.__authSettled = false;
     // Capture the implicit-grant token from the URL fragment
     if (location.hash.includes('access_token')) {
         const params = new URLSearchParams(location.hash.slice(1));
@@ -695,6 +696,7 @@ async function initDiscordAuth() {
     }
     renderGalleryTool();
     window.dispatchEvent(new CustomEvent('discord-auth-changed'));
+    window.__authSettled = true;
 }
 
 function discordLogout() {
@@ -731,7 +733,7 @@ function renderGalleryTool() {
     body.innerHTML = `
         <h3>Add a photo to the gallery</h3>
         <p>Flew something memorable? Pick the photo, tag it with the flight number, and it joins the board.</p>
-        <div class="gallery-identity">${avatar} Adding as <strong>${escapeHtml(user.name)}</strong>
+        <div class="gallery-identity">${avatar} Adding as <a class="gallery-profile" href="https://discord.com/users/${escapeHtml(user.id)}" target="_blank" rel="noopener" title="View profile"><strong>${escapeHtml(user.name)}</strong></a>
             <button type="button" class="gallery-logout" onclick="discordLogout()">Log out</button>
         </div>
         <form id="gallery-form">

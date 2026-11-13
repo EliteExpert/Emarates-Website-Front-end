@@ -123,6 +123,15 @@ function ifeRouteEndpoints(flight) {
         : { from: city, to: 'Dubai' };
 }
 
+async function ifeWaitAuth() {
+    // script.js settles the Discord OAuth state shortly after load; the IFE
+    // waits for it so a fresh login is recognized without a reload.
+    const deadline = Date.now() + 5000;
+    while (window.__authSettled !== true && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+}
+
 function ifeDestinationCity(flight) {
     // "Dubai to Sydney" — strip any (XXX) code and take the city part
     return String(flight.destination || '')
@@ -189,10 +198,19 @@ function iceShell() {
                     </span>
                     <span class="ice-topbar-duration"><i class="fas fa-clock"></i> 1hr flight</span>
                 </div>
-                <div class="ice-body" id="ice-body"></div>
+                <div class="ice-body" id="ice-body">${iceLoadingView()}</div>
             </div>
         </div>
         <p class="result-count ice-note" id="ice-note" aria-live="polite"></p>
+    `;
+}
+
+function iceLoadingView() {
+    return `
+        <div class="ice-loading">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <p>Preparing your entertainment…</p>
+        </div>
     `;
 }
 
@@ -226,7 +244,7 @@ function iceWelcomeView(active, user) {
         const flight = active.flight;
         sideBox = `
             <div class="ice-side-info">
-                <h4><i class="fas fa-route"></i> Now flying</h4>
+                <h4><i class="fas fa-route"></i> ${active.state.recap ? 'Flight recap' : 'Now flying'}</h4>
                 <p class="ice-side-route">${ifeEscape(flight.ptfsDeparture || 'PTFS')} <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(flight.ptfsArrival || 'PTFS')}</p>
                 <div class="ice-minimap" id="ice-minimap" title="Click to enlarge the map">${iceMapSvg(flight, active.state, true)}</div>
                 <ul>
@@ -301,6 +319,7 @@ function iceInfoPanel(flight, state) {
                 <li><span>Duration</span><strong>1hr</strong></li>
                 <li><span>Aircraft</span><strong>${ifeEscape(flight.aircraft || 'A380-800')}</strong></li>
                 <li><span>Terminal</span><strong>${ifeEscape(flight.terminal || 'T3')}</strong></li>
+                <li><span>Discord event</span>${flight.discordEvent ? `<a class="event-chip" href="${ifeEscape(flight.discordEvent)}" target="_blank" rel="noopener">View event ⇗</a>` : '<strong>Not filed</strong>'}</li>
             </ul>
             <div class="ice-map-large" id="ice-map-large">${iceMapSvg(flight, state, false)}</div>
             <p class="ice-map-hint">Map of the PTFS route.</p>
@@ -503,6 +522,7 @@ async function iceRenderSection(section, active, user) {
 async function initIfe() {
     if (!ifeRoot) return;
 
+    await ifeWaitAuth();
     iceShell();
     const user = typeof getDiscordUser === 'function' ? getDiscordUser() : null;
 
@@ -524,11 +544,22 @@ async function initIfe() {
         return;
     }
 
-    const airborne = ifeFlights
-        .map((flight) => ({ flight, state: ifeFlightState(flight) }))
-        .filter((entry) => entry.state.state === 'airborne')
+    // A flight stays viewable for 7 days after departure (the FIDS retains
+    // the record, including the Discord event link, for exactly that long):
+    // live while airborne, then as a recap of the completed flight.
+    const RETENTION_MS = 7 * 86400000;
+    const candidates = ifeFlights
+        .map((flight) => {
+            const state = ifeFlightState(flight);
+            if (state.state === 'arrived' && Date.now() - flight.scheduledTs < RETENTION_MS) {
+                state.recap = true;
+                state.progress = 1;
+            }
+            return { flight, state };
+        })
+        .filter((entry) => entry.state.state === 'airborne' || entry.state.recap)
         .sort((a, b) => b.flight.scheduledTs - a.flight.scheduledTs);
-    ifeActive = airborne[0] || null;
+    ifeActive = candidates[0] || null;
 
     if (ifeActive) iceTopbarUpdate(ifeActive.flight);
     await iceRenderSection('home', ifeActive, user);
