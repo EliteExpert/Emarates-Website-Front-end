@@ -226,7 +226,7 @@ function iceWelcomeView(active, user) {
         const flight = active.flight;
         sideBox = `
             <div class="ice-side-info">
-                <h4><i class="fas fa-route"></i> ${active.state.recap ? 'Flight recap' : 'Now flying'}</h4>
+                <h4><i class="fas fa-route"></i> Now flying</h4>
                 <p class="ice-side-route">${ifeEscape(flight.ptfsDeparture || 'PTFS')} <i class="fas fa-long-arrow-alt-right"></i> ${ifeEscape(flight.ptfsArrival || 'PTFS')}</p>
                 <div class="ice-minimap" id="ice-minimap" title="Click to enlarge the map">${iceMapSvg(flight, active.state, true)}</div>
                 <ul>
@@ -301,7 +301,6 @@ function iceInfoPanel(flight, state) {
                 <li><span>Duration</span><strong>1hr</strong></li>
                 <li><span>Aircraft</span><strong>${ifeEscape(flight.aircraft || 'A380-800')}</strong></li>
                 <li><span>Terminal</span><strong>${ifeEscape(flight.terminal || 'T3')}</strong></li>
-                <li><span>Discord event</span>${flight.discordEvent ? `<a class="event-chip" href="${ifeEscape(flight.discordEvent)}" target="_blank" rel="noopener">View event ⇗</a>` : '<strong>Not filed</strong>'}</li>
             </ul>
             <div class="ice-map-large" id="ice-map-large">${iceMapSvg(flight, state, false)}</div>
             <p class="ice-map-hint">Map of the PTFS route.</p>
@@ -526,21 +525,12 @@ async function initIfe() {
     }
 
     // A flight stays viewable for 7 days after departure (the FIDS retains
-    // the record, including the Discord event link, for exactly that long):
-    // live while airborne, then as a recap of the completed flight.
     const RETENTION_MS = 7 * 86400000;
-    const candidates = ifeFlights
-        .map((flight) => {
-            const state = ifeFlightState(flight);
-            if (state.state === 'arrived' && Date.now() - flight.scheduledTs < RETENTION_MS) {
-                state.recap = true;
-                state.progress = 1;
-            }
-            return { flight, state };
-        })
-        .filter((entry) => entry.state.state === 'airborne' || entry.state.recap)
+    const airborne = ifeFlights
+        .map((flight) => ({ flight, state: ifeFlightState(flight) }))
+        .filter((entry) => entry.state.state === 'airborne')
         .sort((a, b) => b.flight.scheduledTs - a.flight.scheduledTs);
-    ifeActive = candidates[0] || null;
+    ifeActive = airborne[0] || null;
 
     if (ifeActive) iceTopbarUpdate(ifeActive.flight);
     await iceRenderSection('home', ifeActive, user);

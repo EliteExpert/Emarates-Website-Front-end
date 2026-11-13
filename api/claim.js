@@ -80,7 +80,7 @@ function discordFetch(path) {
 }
 
 async function fetchScheduledEvents() {
-  const response = await discordFetch(`/guilds/${DISCORD_GUILD_ID}/scheduled-events?with_user_count=true`);
+  const response = await discordFetch(`/guilds/${DISCORD_GUILD_ID}/scheduled-events?with_user_count=true&with_expired=true`);
   if (!response.ok) throw new Error(`Discord scheduled events responded with ${response.status}`);
   return response.json();
 }
