@@ -123,15 +123,6 @@ function ifeRouteEndpoints(flight) {
         : { from: city, to: 'Dubai' };
 }
 
-async function ifeWaitAuth() {
-    // script.js settles the Discord OAuth state shortly after load; the IFE
-    // waits for it so a fresh login is recognized without a reload.
-    const deadline = Date.now() + 5000;
-    while (window.__authSettled !== true && Date.now() < deadline) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-}
-
 function ifeDestinationCity(flight) {
     // "Dubai to Sydney" — strip any (XXX) code and take the city part
     return String(flight.destination || '')
@@ -198,19 +189,10 @@ function iceShell() {
                     </span>
                     <span class="ice-topbar-duration"><i class="fas fa-clock"></i> 1hr flight</span>
                 </div>
-                <div class="ice-body" id="ice-body">${iceLoadingView()}</div>
+                <div class="ice-body" id="ice-body"></div>
             </div>
         </div>
         <p class="result-count ice-note" id="ice-note" aria-live="polite"></p>
-    `;
-}
-
-function iceLoadingView() {
-    return `
-        <div class="ice-loading">
-            <i class="fas fa-circle-notch fa-spin"></i>
-            <p>Preparing your entertainment…</p>
-        </div>
     `;
 }
 
@@ -230,7 +212,7 @@ function iceWelcomeView(active, user) {
             <div class="ice-side-empty">
                 <i class="fas fa-user-lock"></i>
                 <p>Log in with Discord to use the ICE system.</p>
-                <a class="ice-mini-btn" href="index.html#gallery-tool">How to log in</a>
+                <a class="ice-mini-btn" href="https://discord.gg/PJVAvbJbdn" target="_blank" rel="noopener">Join Discord</a>
             </div>`;
     } else if (!active) {
         const next = ifeNextFlight();
@@ -522,7 +504,6 @@ async function iceRenderSection(section, active, user) {
 async function initIfe() {
     if (!ifeRoot) return;
 
-    await ifeWaitAuth();
     iceShell();
     const user = typeof getDiscordUser === 'function' ? getDiscordUser() : null;
 
