@@ -11,9 +11,27 @@
 // Seats are assigned from per-aircraft cabin layouts and never repeat: the
 // taken seats for each flight are tracked in a Vercel Blob index, and a
 // reserved seat is written back before the pass is issued.
-const { put, list, getDownloadUrl } = require('@vercel/blob');
+const { put, list } = require('@vercel/blob');
 
+const crypto = require('node:crypto');
 const DISCORD_API = process.env.DISCORD_API_BASE || 'https://discord.com/api/v9';
+const BLOB_TOKEN = (process.env.BLOB_READ_WRITE_TOKEN || '').trim();
+
+// Boarding-pass images live in the private Blob store; the browser opens
+// them through this function with an expiring signature instead of headers.
+function signPassUrl(rawUrl) {
+    const expires = Date.now() + 7 * 86400000;
+    const signature = crypto.createHmac('sha256', BLOB_TOKEN || 'emarates-ice')
+        .update(`${rawUrl}|${expires}`).digest('hex').slice(0, 32);
+    return `/api/checkin?pass=${encodeURIComponent(rawUrl)}&t=${expires}&s=${signature}`;
+}
+
+function passSignatureValid(rawUrl, expires, signature) {
+    if (!expires || Date.now() > Number(expires)) return false;
+    const expected = crypto.createHmac('sha256', BLOB_TOKEN || 'emarates-ice')
+        .update(`${rawUrl}|${expires}`).digest('hex').slice(0, 32);
+    return expected === signature;
+}
 const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID || '1294732873143685160';
 const DISCORD_BOT_TOKEN = (process.env.DISCORD_BOT_TOKEN || '').trim();
 const FIDS_FLIGHTS_URL = process.env.FIDS_FLIGHTS_URL || 'https://emirates-ptfs-fids.onrender.com/api/flights';
@@ -138,7 +156,11 @@ async function readSeatIndex() {
     const entry = blobs.find((blob) => blob.pathname === SEATS_INDEX_PATH);
     if (!entry) return {};
     // Private store: the stored URL needs a fresh signed download URL.
-    const response = await fetch(getDownloadUrl(entry.url), { cache: 'no-store' });
+    // Private store: reads must carry the blob token.
+    const response = await fetch(entry.url, {
+      headers: { Authorization: `Bearer ${BLOB_TOKEN}` },
+      cache: 'no-store'
+    });
     if (!response.ok) return {};
     return await response.json();
   } catch {
@@ -173,11 +195,39 @@ async function storePassImage(imageUrl, key) {
     access: 'private',
     contentType: 'image/png'
   });
-  // Private store: hand back a signed download URL for immediate display.
-  return getDownloadUrl(blob.url);
+  return blob.url;
 }
 
 module.exports = async (req, res) => {
+  // Pass proxy: stream a stored boarding-pass image to signed-in members.
+  // Private Blob URLs are only readable with the blob token, so the browser
+  // goes through this route instead of the store directly.
+  const passQuery = req.method === 'GET' && new URL(req.url, 'http://localhost').searchParams.get('pass');
+  if (passQuery) {
+    const passParams = new URL(req.url, 'http://localhost').searchParams;
+    if (!passSignatureValid(passQuery, passParams.get('t'), passParams.get('s'))) {
+      res.statusCode = 403;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({ error: 'This boarding-pass link has expired — reopen your check-in.' }));
+    }
+    try {
+      const response = await fetch(passQuery, {
+        headers: { Authorization: `Bearer ${BLOB_TOKEN}` },
+        signal: AbortSignal.timeout(15000)
+      });
+      if (!response.ok) { res.statusCode = response.status; res.setHeader('Content-Type', 'application/json'); return res.end(JSON.stringify({ error: 'That boarding pass is not available.' })); }
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'private, max-age=60');
+      const buffer = Buffer.from(await response.arrayBuffer());
+      return res.end(buffer);
+    } catch (error) {
+      res.statusCode = 502;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({ error: 'The boarding pass could not be loaded.' }));
+    }
+  }
+
   if (req.method !== 'GET' && req.method !== 'POST') {
     res.setHeader('Allow', 'GET, POST');
     return json(res, 405, { error: 'Method not allowed.' });
@@ -211,7 +261,7 @@ module.exports = async (req, res) => {
             flightNumber, date,
             seat: entry.seat,
             name: entry.name,
-            passUrl: entry.passUrl ? getDownloadUrl(entry.passUrl) : null,
+            passUrl: entry.passUrl ? signPassUrl(entry.passUrl) : null,
             aircraft: entry.aircraft,
             cabin: entry.cabin,
             checkedInAt: entry.ts
@@ -299,7 +349,7 @@ module.exports = async (req, res) => {
       seat,
       cabin: zone.cabin,
       aircraft: flight.aircraft || zone.family,
-      passUrl,
+      passUrl: signPassUrl(passUrl),
       flightNumber,
       date: flightDate,
       departureCode,

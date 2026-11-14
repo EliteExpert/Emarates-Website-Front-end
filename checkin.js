@@ -108,7 +108,18 @@ async function submitCheckin() {
       body: JSON.stringify(payload)
     });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(body.error || "Check-in could not complete right now.");
+    if (!response.ok) {
+      // Already checked in: the server returns the existing seat and pass.
+      if (response.status === 409 && body.seat) {
+        seatLine.innerHTML = `You are already checked in — seat <strong>${escapeHtml(body.seat)}</strong>.`;
+        result.hidden = false;
+        const pass = document.getElementById("checkin-pass");
+        if (body.passUrl) { pass.src = body.passUrl; pass.hidden = false; const link = document.getElementById("checkin-pass-link"); if (link) { link.href = body.passUrl; link.hidden = false; } }
+        await loadCheckins();
+        return;
+      }
+      throw new Error(body.error || "Check-in could not complete right now.");
+    }
 
     result.hidden = false;
     const seatLine = document.getElementById("checkin-seat-line");
