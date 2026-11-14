@@ -191,7 +191,7 @@ const AIRPORT_NAMES = {
 
 function airportNameOf(code, flight) {
   if (!code || code === 'DXB') return 'Dubai';
-  return `${AIRPORT_NAMES[code] || code} (${code})`;
+  return AIRPORT_NAMES[code] || code;
 }
 
 module.exports = async (req, res) => {
