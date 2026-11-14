@@ -96,7 +96,7 @@ module.exports = async (req, res) => {
         access: 'private',
         addRandomSuffix: false,
         contentType: 'application/json',
-        cacheControlMaxAge: 0
+        allowOverwrite: true
       });
       return json(res, 200, { questions, saved: true });
     } catch (error) {

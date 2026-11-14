@@ -172,6 +172,7 @@ async function writeSeatIndex(index) {
   await put(SEATS_INDEX_PATH, JSON.stringify(index), {
     access: 'private',
     addRandomSuffix: false,
+    allowOverwrite: true,
     contentType: 'application/json'
   });
 }
@@ -193,6 +194,8 @@ async function storePassImage(imageUrl, key) {
   const buffer = Buffer.from(await response.arrayBuffer());
   const blob = await put(`boarding-passes/${key}.png`, buffer, {
     access: 'private',
+    addRandomSuffix: false,
+    allowOverwrite: true,
     contentType: 'image/png'
   });
   return blob.url;
@@ -315,6 +318,38 @@ module.exports = async (req, res) => {
     }
 
     const isDeparture = flight.type === 'departure';
+    // Already checked in (e.g. before the boarding-pass storage existed):
+    // re-issue the pass for the same seat instead of failing.
+    const existingMine = taken.find((entry) => String(entry.userId) === String(pilot.id));
+    if (existingMine) {
+      const pass = await generateBoardingPass({
+        name: pilot.name,
+        seat: existingMine.seat,
+        departure_code: isDeparture ? 'DXB' : airportCodeOf(flight.destination),
+        destination_code: isDeparture ? airportCodeOf(flight.destination) : 'DXB',
+        boarding_time: `${flight.departureTime || '00:00'} GMT`,
+        class: existingMine.cabin || zone.cabin,
+        flight_number: flightNumber,
+        departure_name: airportNameOf(isDeparture ? 'DXB' : airportCodeOf(flight.destination), flight),
+        destination_name: airportNameOf(isDeparture ? airportCodeOf(flight.destination) : 'DXB', flight)
+      });
+      const passUrl = await storePassImage(pass.image_url, `${flightNumber}-${flightDate}-${pilot.id}`);
+      existingMine.passUrl = passUrl;
+      existingMine.ts = Date.now();
+      await writeSeatIndex(index);
+      return json(res, 200, {
+        seat: existingMine.seat,
+        cabin: existingMine.cabin || zone.cabin,
+        aircraft: flight.aircraft || zone.family,
+        passUrl: signPassUrl(passUrl),
+        flightNumber,
+        date: flightDate,
+        departureCode: isDeparture ? 'DXB' : airportCodeOf(flight.destination),
+        arrivalCode: isDeparture ? airportCodeOf(flight.destination) : 'DXB',
+        reissued: true
+      });
+    }
+
     const destinationCode = airportCodeOf(flight.destination);
     const departureCode = isDeparture ? 'DXB' : destinationCode;
     const arrivalCode = isDeparture ? destinationCode : 'DXB';
