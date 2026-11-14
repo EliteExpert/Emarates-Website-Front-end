@@ -73,9 +73,9 @@ async function loadCheckins() {
     list.innerHTML = checkins.map((entry) => `
       <div class="claim-row">
         <div class="claim-route"><strong>${escapeHtml(entry.flightNumber)}</strong><small>${escapeHtml(entry.date)} · Seat <strong class="checkin-seat-badge">${escapeHtml(entry.seat)}</strong> · ${escapeHtml(entry.cabin)} · ${escapeHtml(entry.aircraft)}</small>
-          ${entry.passUrl ? `<small class="claim-event"><a class="checkin-pass-link" href="${escapeHtml(entry.passUrl)}" target="_blank" rel="noopener">Open boarding pass ↗</a></small>` : ""}
+          ${entry.passUrl ? `<small class="claim-event"><a class="checkin-pass-link" href="${escapeHtml(entry.passUrl)}" download="boarding-pass.png">Open boarding pass ↗</a></small>` : ""}
         </div>
-        ${entry.passUrl ? `<a href="${escapeHtml(entry.passUrl)}" target="_blank" rel="noopener"><img class="checkin-thumb" src="${escapeHtml(entry.passUrl)}" alt="Boarding pass for ${escapeHtml(entry.flightNumber)}" loading="lazy"></a>` : ""}
+        ${entry.passUrl ? `<a href="${escapeHtml(entry.passUrl)}" download="boarding-pass.png"><img class="checkin-thumb" src="${escapeHtml(entry.passUrl)}" alt="Boarding pass for ${escapeHtml(entry.flightNumber)}" loading="lazy"></a>` : ""}
       </div>`).join("");
   } catch (error) {
     list.innerHTML = `<div class="empty-board">${escapeHtml(error.message)}</div>`;
@@ -114,7 +114,7 @@ async function submitCheckin() {
         seatLine.innerHTML = `You are already checked in — seat <strong>${escapeHtml(body.seat)}</strong>.`;
         result.hidden = false;
         const pass = document.getElementById("checkin-pass");
-        if (body.passUrl) { pass.src = body.passUrl; pass.hidden = false; const link = document.getElementById("checkin-pass-link"); if (link) { link.href = body.passUrl; link.hidden = false; } }
+        if (body.passUrl) { pass.src = body.passUrl; pass.hidden = false; const link = document.getElementById("checkin-pass-link"); if (link) { link.href = body.passUrl; link.hidden = false; link.setAttribute("download", (body.flightNumber || "boarding-pass") + ".png"); link.removeAttribute("target"); } }
         await loadCheckins();
         return;
       }
