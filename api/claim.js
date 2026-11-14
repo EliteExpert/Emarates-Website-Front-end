@@ -156,7 +156,7 @@ function baseMilesForDestination(destination) {
 async function fetchFidsFlights() {
   const response = await fetch(FIDS_FLIGHTS_URL, {
     headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(10000)
+    signal: AbortSignal.timeout(45000)
   });
   if (!response.ok) throw new Error(`FIDS responded with ${response.status}`);
   const payload = await response.json();
@@ -179,6 +179,8 @@ function requireBotToken(res) {
   json(res, 503, { error: 'Attendance checking is not configured yet — set DISCORD_BOT_TOKEN.' });
   return false;
 }
+
+module.exports.maxDuration = 60;
 
 module.exports = async (req, res) => {
   if (req.method !== 'GET' && req.method !== 'POST') {
@@ -326,6 +328,18 @@ module.exports = async (req, res) => {
       return json(res, 503, { error: 'The database hostname only works inside Railway — set DATABASE_URL to its public TCP proxy URL (DATABASE_PUBLIC_URL).' });
     }
     console.error(`${req.method} /api/claim failed:`, error);
-    return json(res, 502, { error: 'Could not record your flight. Try again shortly.' });
+    if (error.name === 'AbortError' || /aborted|timeout/i.test(error.message || '')) {
+      return json(res, 503, { error: 'The FIDS board is waking up (the host sleeps when idle) — try again in a minute.' });
+    }
+    if (error.code === 'DB_NOT_CONFIGURED' || /DATABASE_URL/.test(error.message || '')) {
+      return json(res, 503, { error: 'The miles service is not configured yet.' });
+    }
+    if (/ENOTFOUND|ECONNREFUSED|ETIMEDOUT/i.test(error.message || '') && /railway\.internal/i.test(String(process.env.DATABASE_URL))) {
+      return json(res, 503, { error: 'The database hostname only works inside Railway — set DATABASE_URL to its public TCP proxy URL (DATABASE_PUBLIC_URL).' });
+    }
+    if (/Discord event lookup responded with 40[13]/.test(error.message || '')) {
+      return json(res, 502, { error: 'The Discord bot token was rejected — check DISCORD_BOT_TOKEN on this deployment.' });
+    }
+    return json(res, 502, { error: `Could not record your flight: ${error.message || 'unknown error'}` });
   }
 };
