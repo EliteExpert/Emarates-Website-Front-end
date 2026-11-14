@@ -9,36 +9,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
 </head>
-<body>
-  <header class="site-header" data-header>
-      <div class="shell site-nav">
-          <a class="site-brand" href="index.html" aria-label="Emirates PTFS home">
-              <img src="assets/emirates-tail.png" alt="">
-              <span><strong>Emirates</strong><small>PTFS</small></span>
-          </a>
-          <div class="site-meta">DXB <span>·</span> UTC +4</div>
-          <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span></button>
-          <nav class="site-nav-links" aria-label="Primary navigation">
-              <a href="booking.html" data-nav="booking.html">Flight board</a>
-              <a href="classes.html" data-nav="classes.html">Cabins</a>
-              <a href="checkin.html" data-nav="checkin.html">Check-in</a>
-              <a href="ife.html" data-nav="ife.html">On board</a>
-              <a href="about.html" data-nav="about.html">About us</a>
-              <a href="careers.html" data-nav="careers.html">Careers</a>
-              <a href="https://discord.gg/PJVAvbJbdn" class="nav-join" target="_blank" rel="noopener">Join the community <span aria-hidden="true">↗</span></a>
-              <div class="auth-menu" data-auth-menu>
-                  <button class="auth-button" type="button" data-discord-auth aria-expanded="false">Sign in</button>
-                  <div class="auth-dropdown" role="menu">
-                      <a href="profile.html" role="menuitem">Your profile</a>
-                      <button type="button" role="menuitem" data-auth-signout>Sign out</button>
-                  </div>
-              </div>
-          </nav>
-      </div>
-  </header>
-
+<body data-page="checkin">
+  <div id="header"></div>
   <main class="interior-main">
-    <section class="interior-hero" style="background:url('assets/photos/fleet-takeoff-day.png') center/cover">
+    <section class="interior-hero" style="background:url('assets/photos/cabin-economy.png') center/cover">
       <div class="shell"><p class="eyebrow">Emarates · Before you fly</p><h1>Online check-in.</h1><p>Pick your departure, get your seat from the cabin layout of your aircraft, and your boarding pass is ready in seconds.</p></div>
     </section>
     <section class="interior-section paper">
@@ -82,6 +56,7 @@
     </section>
   </main>
 
+  <div id="footer"></div>
   <script src="script.js"></script>
   <script src="checkin.js"></script>
 </body>
