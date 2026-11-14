@@ -61,6 +61,8 @@ function renderDiscordAuth(user, message = "") {
     }
   });
   document.querySelectorAll("[data-auth-status]").forEach((element) => { element.textContent = message || (user ? `Signed in as ${user.name}` : "Not signed in"); });
+  // Page scripts (the IFE) wait for this before reading the session.
+  window.__authSettled = true;
 }
 
 async function startDiscordAuth() {
