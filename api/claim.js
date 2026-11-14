@@ -79,9 +79,13 @@ function discordFetch(path) {
   });
 }
 
-async function fetchScheduledEvents() {
-  const response = await discordFetch(`/guilds/${DISCORD_GUILD_ID}/scheduled-events?with_user_count=true&with_expired=true`);
-  if (!response.ok) throw new Error(`Discord scheduled events responded with ${response.status}`);
+// Fetched directly by ID: the list endpoint hides completed events unless
+// with_expired is passed, and a completed event must stay resolvable for
+// the whole 7-day claim window.
+async function fetchScheduledEventById(eventId) {
+  const response = await discordFetch(`/guilds/${DISCORD_GUILD_ID}/scheduled-events/${eventId}?with_user_count=true`);
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`Discord event lookup responded with ${response.status}`);
   return response.json();
 }
 
@@ -130,11 +134,7 @@ function discordEventId(flight) {
   return trailing ? trailing[1] : null;
 }
 
-function findMatchingEvent(events, flight) {
-  const id = discordEventId(flight);
-  if (!id) return null;
-  return (events || []).find((event) => String(event.id) === id) || null;
-}
+
 
 function haversineKm(from, to) {
   const radians = (degrees) => (degrees * Math.PI) / 180;
@@ -204,12 +204,16 @@ module.exports = async (req, res) => {
     const account = await upsertAccount(pilot.id, pilot.name);
 
     const flights = departedDepartures(await fetchFidsFlights());
-    const scheduledEvents = await fetchScheduledEvents();
 
-    // Match every departed flight to its linked Discord scheduled event once.
+    // Resolve every departed flight's linked Discord scheduled event directly
+    // by the ID stored on the FIDS flight — completed events included.
     const matched = new Map();
+    const eventCache = new Map();
     for (const flight of flights) {
-      matched.set(flight, findMatchingEvent(scheduledEvents, flight));
+      const eventId = discordEventId(flight);
+      if (!eventId) { matched.set(flight, null); continue; }
+      if (!eventCache.has(eventId)) eventCache.set(eventId, await fetchScheduledEventById(eventId));
+      matched.set(flight, eventCache.get(eventId));
     }
 
     if (req.method === 'GET') {
@@ -273,7 +277,8 @@ module.exports = async (req, res) => {
       return json(res, 404, { error: 'That flight is not on the FIDS departures board (or has not departed yet).' });
     }
     const reference = flightReference(flightNumber, flightDate);
-    const event = findMatchingEvent(scheduledEvents, flight);
+    const eventId = discordEventId(flight);
+    const event = eventId ? await fetchScheduledEventById(eventId) : null;
     if (!event) {
       return json(res, 404, { error: 'No Discord event is linked to this flight — staff can link one on the FIDS board.' });
     }
