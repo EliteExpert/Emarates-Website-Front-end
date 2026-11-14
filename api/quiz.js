@@ -3,7 +3,7 @@
 //   POST /api/quiz  -> admin-only (Discord role check); replaces the quiz.
 // Requires BLOB_READ_WRITE_TOKEN (from a Blob store linked to the project)
 // and QUIZ_ADMIN_ROLE_IDS (comma-separated Discord role IDs) for authoring.
-const { put, list } = require('@vercel/blob');
+const { put, list, getDownloadUrl } = require('@vercel/blob');
 
 const DISCORD_API = 'https://discord.com/api/v9';
 const QUIZ_PATH = 'ice/quiz.json';
@@ -35,7 +35,7 @@ async function readQuiz() {
   const { blobs } = await list({ prefix: QUIZ_PATH, limit: 1 });
   const entry = blobs.find((blob) => blob.pathname === QUIZ_PATH);
   if (!entry) return null;
-  const response = await fetch(entry.url, { cache: 'no-store' });
+  const response = await fetch(getDownloadUrl(entry.url), { cache: 'no-store' });
   if (!response.ok) return null;
   return sanitizeQuestions(await response.json());
 }
@@ -93,7 +93,7 @@ module.exports = async (req, res) => {
 
     try {
       await put(QUIZ_PATH, JSON.stringify(questions), {
-        access: 'public',
+        access: 'private',
         addRandomSuffix: false,
         contentType: 'application/json',
         cacheControlMaxAge: 0

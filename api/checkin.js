@@ -11,7 +11,7 @@
 // Seats are assigned from per-aircraft cabin layouts and never repeat: the
 // taken seats for each flight are tracked in a Vercel Blob index, and a
 // reserved seat is written back before the pass is issued.
-const { put, list } = require('@vercel/blob');
+const { put, list, getDownloadUrl } = require('@vercel/blob');
 
 const DISCORD_API = process.env.DISCORD_API_BASE || 'https://discord.com/api/v9';
 const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID || '1294732873143685160';
@@ -137,7 +137,8 @@ async function readSeatIndex() {
     const { blobs } = await list({ prefix: SEATS_INDEX_PATH, limit: 1 });
     const entry = blobs.find((blob) => blob.pathname === SEATS_INDEX_PATH);
     if (!entry) return {};
-    const response = await fetch(entry.url, { cache: 'no-store' });
+    // Private store: the stored URL needs a fresh signed download URL.
+    const response = await fetch(getDownloadUrl(entry.url), { cache: 'no-store' });
     if (!response.ok) return {};
     return await response.json();
   } catch {
@@ -147,10 +148,9 @@ async function readSeatIndex() {
 
 async function writeSeatIndex(index) {
   await put(SEATS_INDEX_PATH, JSON.stringify(index), {
-    access: 'public',
+    access: 'private',
     addRandomSuffix: false,
-    contentType: 'application/json',
-    cacheControlMaxAge: 0
+    contentType: 'application/json'
   });
 }
 
@@ -170,10 +170,11 @@ async function storePassImage(imageUrl, key) {
   if (!response.ok) throw new Error(`The generated boarding pass could not be fetched (${response.status})`);
   const buffer = Buffer.from(await response.arrayBuffer());
   const blob = await put(`boarding-passes/${key}.png`, buffer, {
-    access: 'public',
+    access: 'private',
     contentType: 'image/png'
   });
-  return blob.url;
+  // Private store: hand back a signed download URL for immediate display.
+  return getDownloadUrl(blob.url);
 }
 
 module.exports = async (req, res) => {
@@ -210,7 +211,7 @@ module.exports = async (req, res) => {
             flightNumber, date,
             seat: entry.seat,
             name: entry.name,
-            passUrl: entry.passUrl,
+            passUrl: entry.passUrl ? getDownloadUrl(entry.passUrl) : null,
             aircraft: entry.aircraft,
             cabin: entry.cabin,
             checkedInAt: entry.ts
